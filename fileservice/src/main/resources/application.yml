@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: fileservice
+
+server:
+  port: 8086
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    prefer-ip-address: true
+    hostname: localhost
+    ip-address: 127.0.0.1
+    instance-id: ${spring.application.name}:localhost:${server.port}
+
+jwt:
+  signerKey: "WjG25z4tA+dZX3clK+u0/kRg1tCdV6vvaizOfsJLgy4HFasdkfwxKso+KlGArOm4uOdkai"
+  valid-duration: 36000
