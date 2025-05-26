@@ -1,7 +1,6 @@
 package com.tranxuanphong.userservice.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.AccessLevel;
@@ -20,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.tranxuanphong.userservice.dto.request.ApiResponse;
 import com.tranxuanphong.userservice.dto.request.LoginRequest;
 import com.tranxuanphong.userservice.dto.request.RegisterRequest;
-import com.tranxuanphong.userservice.dto.request.UserUpdateRequest;
+import com.tranxuanphong.userservice.dto.request.UserUpdatePasswordRequest;
 import com.tranxuanphong.userservice.dto.response.LoginResponse;
 import com.tranxuanphong.userservice.dto.response.UserResponse;
 import com.tranxuanphong.userservice.service.UserService;
@@ -33,7 +32,6 @@ import jakarta.validation.Valid;
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
 public class UserController {
-  private static final Logger log = LoggerFactory.getLogger(UserController.class);
   UserService userService;
 
   @PostMapping("/register")
@@ -43,17 +41,17 @@ public class UserController {
     .build();
   }
   
-  @PutMapping("/{email}")
-  public ApiResponse<UserResponse> update(@PathVariable @Valid String email, @RequestBody UserUpdateRequest request){
+  @PutMapping
+  public ApiResponse<UserResponse> updatePassword(@RequestBody UserUpdatePasswordRequest request){
     return ApiResponse.<UserResponse>builder()
-    .result(userService.update(email, request))
+    .result(userService.updatePassword(request))
     .build();
   }
 
-  @GetMapping("/{email}")
-  public ApiResponse<UserResponse> getUser(@PathVariable String email) {
+  @GetMapping
+  public ApiResponse<UserResponse> getUser() {
     return ApiResponse.<UserResponse>builder()
-    .result(userService.getUser(email))
+    .result(userService.getUser())
     .build();
   }
 
@@ -64,13 +62,6 @@ public class UserController {
     .build();
   }
 
-  @GetMapping("/myInfo") 
-  public ApiResponse<UserResponse> getMyInfo(){ 
-    return ApiResponse.<UserResponse>builder() 
-    .result(userService.getMyInfo()) 
-    .build(); 
-  }
-
   @PostMapping("/login")
   public ApiResponse<LoginResponse> login(@RequestBody @Valid LoginRequest request){
     return ApiResponse.<LoginResponse>builder()
@@ -78,16 +69,27 @@ public class UserController {
     .build();
   }
 
-
-  // Product
-  @GetMapping("/check-id/{id}")
-  public boolean checkId(@PathVariable String id) {
-    // log.info("id: " +id);
-    return userService.checkId(id);
+  @PutMapping("/update-role/{roleId}")
+  public ApiResponse<UserResponse> updateRole(@PathVariable String roleId) {
+    return ApiResponse.<UserResponse>builder()
+    .result(userService.updateRole(roleId))
+    .build();
   }
 
 
-  @GetMapping("/get-userid/{email}")
+  // Product
+  @GetMapping("/check/id/{id}")
+  public boolean checkById(@PathVariable String id) {
+    return userService.checkId(id);
+  }
+
+  @GetMapping("/check/email/{email}")
+  public boolean checkByEmail(@PathVariable String email) {
+    return userService.checkByEmail(email);
+  }
+
+
+  @GetMapping("/get/userid/email/{email}")
   public String getUserId(@PathVariable String email){
     System.out.println("email: " + email);
     return userService.getUserId(email);

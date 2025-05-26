@@ -3,11 +3,10 @@ package com.tranxuanphong.userservice.entity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 import java.time.LocalDate;
 
-@Document(collection = "addresses")
 @Setter
 @Getter
 @NoArgsConstructor
@@ -25,5 +24,6 @@ public class Address {
 
     String address;
 
+    @Indexed(unique = true)
     String phone;
 }

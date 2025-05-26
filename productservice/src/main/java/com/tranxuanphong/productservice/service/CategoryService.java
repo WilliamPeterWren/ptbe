@@ -1,55 +1,72 @@
 package com.tranxuanphong.productservice.service;
 
 
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.tranxuanphong.productservice.dto.request.CreateCategoryRequest;
-import com.tranxuanphong.productservice.dto.request.UpdateCategoryRequest;
+import com.tranxuanphong.productservice.dto.request.CategoryCreateRequest;
+import com.tranxuanphong.productservice.dto.request.CategoryUpdateRequest;
 import com.tranxuanphong.productservice.dto.response.CategoryResponse;
 import com.tranxuanphong.productservice.entity.Category;
 import com.tranxuanphong.productservice.exception.AppException;
 import com.tranxuanphong.productservice.exception.ErrorCode;
 import com.tranxuanphong.productservice.mapper.CategoryMapper;
-import com.tranxuanphong.productservice.repository.CategoryRepository;
+import com.tranxuanphong.productservice.repository.httpclient.PeterClient;
+// import com.tranxuanphong.productservice.repository.elasticsearch.CategoryElasticsearchRepository;
 import com.tranxuanphong.productservice.repository.httpclient.UserClient;
+import com.tranxuanphong.productservice.repository.mongo.CategoryRepository;
+import com.tranxuanphong.productservice.repository.mongo.ProductRepository;
 import com.tranxuanphong.productservice.utils.GenerateSlug;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Set;
 
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @AllArgsConstructor
-@Slf4j
 public class CategoryService {
   CategoryRepository categoryRepository;
+  ProductRepository productRepository;
   CategoryMapper categoryMapper;
   UserClient userClient;
+  PeterClient peterClient;
 
   GenerateSlug generateSlug;
+  // CategoryElasticsearchRepository categoryElasticsearchRepository;
 
-  public CategoryResponse create(CreateCategoryRequest request){
+  @PreAuthorize("hasRole('ROLE_SELLER')")
+  public CategoryResponse create(CategoryCreateRequest request){
 
-    if(categoryRepository.existsByCategoryName(request.getCategoryName())){
-      throw new AppException(ErrorCode.CATEGORY_EXISTS);
+    String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
+    String sellerId = userClient.userId(email);
+
+    Set<String> peterCategories = request.getPeterCategories();
+    for(String id: peterCategories){
+      if(!peterClient.existsId(id)){
+        throw new AppException(ErrorCode.PETER_CATEGORY_NOT_EXISTS);
+      }
     }
 
-    boolean response = userClient.existsId(request.getSellerId());
-
-    if(!response){
-      throw new AppException(ErrorCode.UNAUTHENTICATED);
+    List<Category> categories = categoryRepository.findBySellerId(sellerId);
+    for(Category c: categories){
+      if(c.getCategoryName().equals(request.getCategoryName())){
+        throw new AppException(ErrorCode.CATEGORY_EXISTS);
+      }
     }
 
     String slug = generateSlug.generateSlug(request.getCategoryName());
 
-    request.setSlug(slug);
-
     Category category = categoryMapper.toCategory(request);
+    category.setSellerId(sellerId);
+    category.setSlug(slug);
+
+    // categoryElasticsearchRepository.save(category);
 
     return categoryMapper.toCategoryResponse(categoryRepository.save(category));
   }
@@ -67,22 +84,57 @@ public class CategoryService {
     return categoryMapper.toCategoryResponse(category);
   }
 
-  public CategoryResponse update(String slug, UpdateCategoryRequest request){
-    Category category = categoryRepository.findBySlug(slug).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTS));
-    
-    if(categoryRepository.existsByCategoryName(request.getCategoryName())){
-      throw new AppException(ErrorCode.CATEGORY_EXISTS);
+  @PreAuthorize("hasRole('ROLE_SELLER')")
+  public CategoryResponse update(String slug, CategoryUpdateRequest request){
+    String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
+    String sellerId = userClient.userId(email);
+
+    Set<String> peterCategories = request.getPeterCategories();
+    for(String id: peterCategories){
+      if(!peterClient.existsId(id)){
+        throw new AppException(ErrorCode.PETER_CATEGORY_NOT_EXISTS);
+      }
     }
 
+    List<Category> categories = categoryRepository.findBySellerId(sellerId);
+    for(Category c: categories){
+      if(c.getCategoryName().equals(request.getCategoryName())){
+        throw new AppException(ErrorCode.CATEGORY_EXISTS);
+      }
+    }
+
+    Category category = categoryRepository.findBySlug(slug).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTS));
     categoryMapper.updateCategory(category, request);
-    
     return categoryMapper.toCategoryResponse(category);
   }
 
+  @PreAuthorize("hasRole('ROLE_SELLER')")
   public void delete(String id){
-    categoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTS));
+    String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
+    String sellerId = userClient.userId(email);
+
+    List<Category> categories = categoryRepository.findBySellerId(sellerId);
+
+    boolean checkCategoryInSeller = false;
+    for(Category c:categories){
+      if(c.getId().equals(id)){
+        checkCategoryInSeller = true;
+        break;
+      }
+    }
+
+    if(!checkCategoryInSeller){
+      throw new AppException(ErrorCode.CATEGORY_SELLER_NOT_MATCH);
+    }
+
+    if(productRepository.existsByCategoryId(id)){
+      throw new AppException(ErrorCode.PRODUCT_IN_CATEGORY_EXIST);
+    }
 
     categoryRepository.deleteById(id);
   }
 
+  // public List<Category> searchCategoriesByCriteria(String name, String sellerId) {
+  //   return categoryElasticsearchRepository.searchByCriteria(name, sellerId);
+  // }
 }

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,6 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
   private final String[] PUBLIC_ENDPOINTS_POST = {
@@ -28,17 +30,14 @@ public class SecurityConfig {
   };
 
   private final String[] PUBLIC_ENDPOINTS_GET = {
-    "/api/products/{slug}",
-    "/api/products/get-products",
 
-    "/api/infors/by-product/{productId}",
- 
+    "/api/products/{slug}",
 
     "/api/categories/{slug}",
     "/api/categories/get-by-sellerid/{sellerId}",
 
-    "/api/variants/by-product/{productId}",
-
+    "/api/products/product-by-seller/{productId}/{sellerId}",
+    "/api/products/get-products/seller/{sellerId}"
   };
 
   // private String signerKey = "WjG25z4tA+dZX3clK+u0/kRg1tCdV6vvaizOfsJLgy4HFasdkfwxKso+KlGArOm4uOdkai";

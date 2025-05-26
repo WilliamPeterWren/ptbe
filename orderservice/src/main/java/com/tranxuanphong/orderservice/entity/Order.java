@@ -27,6 +27,8 @@ public class Order {
   String id;
 
   String userId;
+  
+  String sellerId;
 
   @Builder.Default
   Set<OrderItem> orderItems = new HashSet<>();
@@ -35,6 +37,8 @@ public class Order {
   Set<Status> orderStatus = new HashSet<>();
   
   Long shippingVoucherId;
+
+  String sellerVoucherId;
 
   String addressId;
 

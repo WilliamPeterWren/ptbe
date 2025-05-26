@@ -1,12 +1,14 @@
 package com.tranxuanphong.productservice.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tranxuanphong.productservice.dto.request.CreateCategoryRequest;
-import com.tranxuanphong.productservice.dto.request.UpdateCategoryRequest;
+import com.tranxuanphong.productservice.dto.request.CategoryCreateRequest;
+import com.tranxuanphong.productservice.dto.request.CategoryUpdateRequest;
 import com.tranxuanphong.productservice.dto.response.ApiResponse;
 import com.tranxuanphong.productservice.dto.response.CategoryResponse;
+import com.tranxuanphong.productservice.entity.Category;
 import com.tranxuanphong.productservice.service.CategoryService;
 
 import lombok.AccessLevel;
@@ -31,7 +33,7 @@ public class CategoryController {
   CategoryService categoryService;
 
   @PostMapping
-  public ApiResponse<CategoryResponse> create(@RequestBody CreateCategoryRequest request) {
+  public ApiResponse<CategoryResponse> create(@RequestBody CategoryCreateRequest request) {
     return ApiResponse.<CategoryResponse>builder()
       .result(categoryService.create(request))
       .build();
@@ -59,7 +61,7 @@ public class CategoryController {
   }
 
   @PutMapping("/{slug}")
-  public ApiResponse<CategoryResponse> upadte(@PathVariable String slug, @RequestBody UpdateCategoryRequest request) {
+  public ApiResponse<CategoryResponse> upadte(@PathVariable String slug, @RequestBody CategoryUpdateRequest request) {
     return ApiResponse.<CategoryResponse>builder()
     .result(categoryService.update(slug, request))
     .build();
@@ -73,4 +75,13 @@ public class CategoryController {
     .result("Success delete category")
     .build();
   }
+
+  //  @GetMapping("/search")
+  //   public ApiResponse<List<Category>> searchCategories(
+  //           @RequestParam(required = false) String name,
+  //           @RequestParam(required = false) String sellerId) {
+  //       return ApiResponse.<List<Category>>builder()
+  //               .result(categoryService.searchCategoriesByCriteria(name, sellerId))
+  //               .build();
+  //   }
 }

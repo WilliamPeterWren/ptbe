@@ -3,6 +3,13 @@ spring:
     name: apigateway
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3000"
+            allowedMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+            allowedHeaders: "*"
+            exposedHeaders: "Content-Range"
       discovery:
         locator:
           enabled: true
@@ -16,12 +23,12 @@ spring:
         - id: productservice
           uri: lb://productservice
           predicates:
-            - Path=/api/products/**,/api/categories/**,/api/variants/**,/api/infos/**
+            - Path=/api/products/**,/api/categories/**
 
         - id: cartservice
           uri: lb://cartservice
           predicates:
-           - Path=/api/carts/**,/api/cartitems/**
+           - Path=/api/carts/**
            
         - id: orderservice
           uri: lb://orderservice
@@ -32,6 +39,11 @@ spring:
           uri: lb://fileservice
           predicates:
            - Path=/api/files/**,/images/**
+
+        - id: peterservice
+          uri: lb://peterservice
+          predicates:
+           - Path=/api/petercategories/**,/api/flashsales/**
   main:
     web-application-type: reactive
 server:

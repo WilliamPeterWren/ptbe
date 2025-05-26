@@ -11,4 +11,6 @@ import lombok.experimental.FieldDefaults;
 public class LoginResponse {
   String accessToken;
   String refreshToken;
+  String id;
+  String email;
 }

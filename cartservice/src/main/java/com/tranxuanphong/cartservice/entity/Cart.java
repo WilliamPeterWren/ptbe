@@ -8,8 +8,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 
@@ -23,6 +26,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Cart {
   @Id
   String id; 
+
+  @Indexed(unique = true)
   String userId;
+
+  @Indexed(unique = true)
+  Set<Seller> sellers;
 
 }

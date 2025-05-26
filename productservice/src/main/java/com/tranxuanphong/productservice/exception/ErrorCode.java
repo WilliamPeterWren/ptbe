@@ -23,11 +23,12 @@ public enum ErrorCode {
   SELLER_NOT_EXISTS(1009,"seller not exists", HttpStatus.BAD_REQUEST),
   EMAIL_NOT_EXISTED(1010, "Email not exists",  HttpStatus.NOT_FOUND),
   CATEGORY_NOT_EXISTS(1011, "category not exists",  HttpStatus.NOT_FOUND),
+  PETER_CATEGORY_NOT_EXISTS(1011, "category not exists",  HttpStatus.NOT_FOUND),
   PRODUCT_EXISTS(1012,"product already exists", HttpStatus.BAD_REQUEST),
   PRODUCT_NOT_EXISTS(1013,"product not exists", HttpStatus.NOT_FOUND),
   PRODUCT_INVALID(1014,"PRODUCT NAME INVALID", HttpStatus.BAD_REQUEST),
   SELLERID_INVALID(1015,"SELLER ID INVALID", HttpStatus.BAD_REQUEST),
-  CATEGORYID_INVALID(1015,"SELLER ID INVALID", HttpStatus.BAD_REQUEST),
+  CATEGORYID_INVALID(1015,"category INVALID", HttpStatus.BAD_REQUEST),
   DESCRIPTION_INVALID(1015,"SELLER ID INVALID", HttpStatus.BAD_REQUEST),
   PRODUCTID_INVALID(1015,"PRODUCT ID INVALID", HttpStatus.NOT_FOUND),
   INFO_NAME_INVALID(1015,"INFO NAME INVALID", HttpStatus.BAD_REQUEST),
@@ -39,6 +40,14 @@ public enum ErrorCode {
   STOCK_INVALID(1013,"  VARIANT STOCK INVALID", HttpStatus.BAD_REQUEST),
   VARIANT_NOT_EXISTS(1013,"variant not exists", HttpStatus.NOT_FOUND),
   VARIANT_EXISTS(1013,"variant already exists", HttpStatus.BAD_REQUEST),
+
+  CATEGORY_SELLER_NOT_MATCH(1013,"CATEGORY NOT BELONG TO SELLER", HttpStatus.BAD_REQUEST),
+  PRODUCT_SELLER_NOT_MATCH(1013,"CATEGORY NOT BELONG TO SELLER", HttpStatus.BAD_REQUEST),
+  PRODUCT_IN_CATEGORY_EXIST(1013,"products may exist in this category", HttpStatus.BAD_REQUEST),
+  
+  INFO_NAME_DUPLICATE(1013,"info name duplicate ...", HttpStatus.BAD_REQUEST),
+  SELLER_NOT_EXIST(1013,"seller not exists ...", HttpStatus.NOT_FOUND),
+  SELLER_EXIST(1013,"seller already exists ...", HttpStatus.BAD_REQUEST),
   ; 
 
   int code; 

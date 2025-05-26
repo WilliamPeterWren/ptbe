@@ -5,6 +5,7 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017/userservice
       database: userservice
+  
 server:
   port: 8081
 jwt:
@@ -21,3 +22,6 @@ eureka:
     hostname: localhost
     ip-address: 127.0.0.1
     instance-id: ${spring.application.name}:localhost:${server.port}
+
+frontend:
+  port: 3000

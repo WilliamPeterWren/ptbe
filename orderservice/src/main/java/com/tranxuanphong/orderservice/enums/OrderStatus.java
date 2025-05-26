@@ -3,12 +3,14 @@ package com.tranxuanphong.orderservice.enums;
 
 public enum OrderStatus {
     PENDING,
-    PREPAIRING,
-    PREPAIRED,
-    TAKING,
-    TAKEN,
-    LOCATING,
+    SELLER_CANCELLED,
+    SELLER_CHECKING,
+    SELLER_PREPAIRING,
+    SELLER_PREPAIRED,
+    SHIPPER_TAKING,
+    SHIPPER_TAKEN,
+    DISPATCHED,
     DELIVERING,
-    DONE,
-    CANCEL
+    DELIVERD,
+    CANCELLED
 }

@@ -3,10 +3,10 @@ package com.tranxuanphong.cartservice.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tranxuanphong.cartservice.dto.request.CreateCartRequest;
+import com.tranxuanphong.cartservice.dto.request.AddToCartRequest;
+import com.tranxuanphong.cartservice.dto.request.CartUpdateRequest;
 import com.tranxuanphong.cartservice.dto.response.ApiResponse;
-import com.tranxuanphong.cartservice.dto.response.CreateCartResponse;
-import com.tranxuanphong.cartservice.dto.response.GetCartResponse;
+import com.tranxuanphong.cartservice.dto.response.CartResponse;
 import com.tranxuanphong.cartservice.service.CartService;
 
 import lombok.AccessLevel;
@@ -14,10 +14,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
-
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+
 
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -28,28 +29,44 @@ public class CartController {
 
 
   @PostMapping
-  public ApiResponse<CreateCartResponse> create(@RequestBody CreateCartRequest request) {
-    System.out.println("cart con troller");
-
-    CreateCartResponse response = cartService.create(request);
-    System.out.println("cart id: " + response.getCartId() + " userid: " + response.getUserId());
-    return ApiResponse.<CreateCartResponse>builder()
-      .result(response)
+  public ApiResponse<CartResponse> create() {
+    return ApiResponse.<CartResponse>builder()
+      .result(cartService.create())
       .build();
   }
 
-  @GetMapping("/{userId}")
-  public ApiResponse<GetCartResponse> getCart(@PathVariable String userId) {
+  @GetMapping
+  public ApiResponse<CartResponse> getCart() {
+    return ApiResponse.<CartResponse>builder()
+    .result(cartService.getCart())
+    .build();
+  }
 
-    // System.out.println("user id: " + userId);
+  @PostMapping
+  public ApiResponse<CartResponse> addToCart(@RequestBody AddToCartRequest request) {
+    return ApiResponse.<CartResponse>builder()
+      .result(cartService.addToCart(request))
+      .build();
+  }
 
-    // GetCartResponse response = cartService.getCart(userId);
+  @PutMapping
+  public ApiResponse<CartResponse> update(@RequestBody CartUpdateRequest request) {
+    return ApiResponse.<CartResponse>builder()
+    .result(cartService.update(request))
+    .build();
+  }
 
-    // System.out.println("user id: " + response.getCartId() + "cart id: " + response.getUserId());
+  @DeleteMapping("/caritem/id/{cartItemId}")
+  public ApiResponse<CartResponse> deleteCartItem(@PathVariable String cartItemId) {
+    return ApiResponse.<CartResponse>builder()
+    .result(cartService.deleteCartItem(cartItemId))
+    .build();
+  }
 
-    // System.out.println("list: " + response.getCartItems().toString());
-    return ApiResponse.<GetCartResponse>builder()
-    .result(cartService.getCart(userId))
+  @DeleteMapping("/seller/id/{sellerId}")
+  public ApiResponse<CartResponse> deleteSeller(@PathVariable String sellerId) {
+    return ApiResponse.<CartResponse>builder()
+    .result(cartService.deleteSeller(sellerId))
     .build();
   }
 

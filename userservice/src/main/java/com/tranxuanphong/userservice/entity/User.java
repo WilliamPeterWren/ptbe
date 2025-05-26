@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
+import org.springframework.data.mongodb.core.index.Indexed;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -27,11 +27,12 @@ public class User {
   @Id
   String id;
 
+  @Indexed(unique = true)
   String email;
   String password;
 
   @Builder.Default
-  Address address = null;
+  String addressId = null;
 
   @Builder.Default
   Set<Role> roles = new HashSet<>();

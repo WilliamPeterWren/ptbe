@@ -17,6 +17,7 @@
         <module>cartservice</module>
         <module>orderservice</module>
         <module>fileservice</module>
+        <module>peterservice</module>
 
     </modules>
 

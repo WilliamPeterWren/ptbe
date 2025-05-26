@@ -3,6 +3,9 @@ package com.tranxuanphong.productservice.dto.response;
 import java.time.LocalDate;
 import java.util.Set;
 
+import com.tranxuanphong.productservice.entity.Info;
+import com.tranxuanphong.productservice.entity.Variant;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,6 +21,10 @@ public class ProductResponse {
   String categoryId;
 
   Set<String> productImages;
+
+  Set<Variant> variants;
+
+  Set<Info> infos;
 
   String slug;
 

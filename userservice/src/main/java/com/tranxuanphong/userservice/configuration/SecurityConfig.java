@@ -34,6 +34,8 @@ public class SecurityConfig {
 
   private final String[] PUBLIC_ENDPOINTS_GET = {
     "/api/users/check-id/{id}",
+    "/api/users/get-userid/{email}",
+    "/api/addresses/**"
   };
 
   // private String signerKey = "WjG25z4tA+dZX3clK+u0/kRg1tCdV6vvaizOfsJLgy4HFasdkfwxKso+KlGArOm4uOdkai";

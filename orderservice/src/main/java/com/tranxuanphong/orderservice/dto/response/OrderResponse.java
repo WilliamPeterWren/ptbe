@@ -17,6 +17,7 @@ import lombok.Data;
 public class OrderResponse {
   String id;
   String userId;
+  String sellerId;
   Set<OrderItem> orderItems;
   Long shippingVoucherId;
   String addressId;

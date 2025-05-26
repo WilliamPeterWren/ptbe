@@ -5,6 +5,10 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017/productservice
       database: productservice
+    # elasticsearch:
+    #   uris: http://localhost:9200
+    #   username: elastic
+    #   password: your_password
 server:
   port: 8082
 eureka:
@@ -18,7 +22,6 @@ eureka:
     hostname: localhost
     ip-address: 127.0.0.1
     instance-id: ${spring.application.name}:localhost:${server.port}
-
 jwt:
   signerKey: "WjG25z4tA+dZX3clK+u0/kRg1tCdV6vvaizOfsJLgy4HFasdkfwxKso+KlGArOm4uOdkai"
   valid-duration: 36000

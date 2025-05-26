@@ -3,8 +3,8 @@ package com.tranxuanphong.orderservice.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tranxuanphong.orderservice.dto.request.CreateOrderRequest;
-import com.tranxuanphong.orderservice.dto.request.UpdateOrderRequest;
+import com.tranxuanphong.orderservice.dto.request.OrderCreateRequest;
+import com.tranxuanphong.orderservice.dto.request.OrderUpdateRequest;
 import com.tranxuanphong.orderservice.dto.response.ApiResponse;
 import com.tranxuanphong.orderservice.dto.response.OrderResponse;
 import com.tranxuanphong.orderservice.service.OrderService;
@@ -20,6 +20,8 @@ import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -29,11 +31,24 @@ public class OrderController {
   OrderService orderService;
 
   @PostMapping
-  public ApiResponse<OrderResponse> create(@RequestBody CreateOrderRequest request) {
+  public ApiResponse<OrderResponse> create(@RequestBody OrderCreateRequest request) {
     return ApiResponse.<OrderResponse>builder()
       .result(orderService.create(request))
       .build();
   }
+
+  @GetMapping("/exists-by-address/{addressId}")
+  public boolean doesAddressExist(@PathVariable String addressId) {
+    return orderService.doesAddressExist(addressId);
+  }
+  
+  @PutMapping("/id/{orderId}")
+  public ApiResponse<OrderResponse> update(@PathVariable String orderId, @RequestBody OrderUpdateRequest request) {
+    return ApiResponse.<OrderResponse>builder()
+      .result(orderService.update(orderId, request))
+      .build();
+  }
+
 
   // @GetMapping("/get-all")
   // public ApiResponse<List<OrderResponse>> getAll() {

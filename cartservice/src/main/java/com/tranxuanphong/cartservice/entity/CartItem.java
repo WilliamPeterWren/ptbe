@@ -11,9 +11,7 @@ import lombok.experimental.FieldDefaults;
 
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "cartitems")
 @Setter
 @Getter
 @NoArgsConstructor
@@ -24,11 +22,7 @@ public class CartItem {
   @Id
   String id;
 
-  String cartId;
-
   String variantId;
   Long quantity;
 
-  // @Builder.Default
-  // LocalDate updatedAt = LocalDate.now();
 }

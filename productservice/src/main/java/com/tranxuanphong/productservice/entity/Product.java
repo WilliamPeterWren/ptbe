@@ -5,8 +5,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-
+// import org.springframework.data.elasticsearch.annotations.Field;
+// import org.springframework.data.elasticsearch.annotations.FieldType;
+// import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -17,6 +20,12 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 @Document(collection = "products")
+// @org.springframework.data.elasticsearch.annotations.Document(indexName = "products")
+// @org.springframework.data.elasticsearch.annotations.Document(
+//     indexName = "products", // The Elasticsearch index name for this entity
+//     createIndex = true, // Automatically create the index if it doesn't exist
+//     writeTypeHint = WriteTypeHint.FALSE // Avoids adding _class field to ES document
+// )
 @Setter
 @Getter
 @NoArgsConstructor
@@ -24,25 +33,40 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class Product {
-  @Id
-  String id;
+    @Id
+    String id;
 
-  String sellerId;
+    // @Field(type = FieldType.Text)
+    String sellerId;
 
-  String productName;
+    // @Field(type = FieldType.Text)
+    String productName;
 
-  String categoryId;
+    // @Field(type = FieldType.Text)
+    String categoryId;
 
-  @Builder.Default
-  Set<String> productImages = new HashSet<>();
+    @Builder.Default
+    // @Field(type = FieldType.Nested)
+    Set<String> productImages = new HashSet<>();
 
-  String slug;
+    @Builder.Default
+    Set<Variant> variants = new HashSet<>();
 
-  String description;
+    @Builder.Default
+    Set<Info> infos = new HashSet<>();
 
-  @Builder.Default
-  LocalDate createdAt = LocalDate.now();
+    // @Field(type = FieldType.Text)
+    @Indexed(unique = true)
+    String slug;
 
-  @Builder.Default
-  LocalDate updatedAt = LocalDate.now();
+    // @Field(type = FieldType.Text)
+    String description;
+
+    @Builder.Default
+    // @Field(type = FieldType.Date)
+    LocalDate createdAt = LocalDate.now();
+
+    @Builder.Default
+    // @Field(type = FieldType.Date)
+    LocalDate updatedAt = LocalDate.now();
 }

@@ -43,6 +43,9 @@ public enum ErrorCode {
 
   CART_NOT_FOUND(1013,"cart not found", HttpStatus.NOT_FOUND),
   CART_EXISTS(1013,"cart already exists", HttpStatus.NOT_FOUND),
+  CUSTOMER_SELLER_CONFLIC(1013,"can't order your own product", HttpStatus.NOT_FOUND),
+  ORDER_NOT_FOUND(1013,"order not found", HttpStatus.NOT_FOUND),
+  ORDER_USER_NOT_FOUND(1013,"this user don't have this order", HttpStatus.NOT_FOUND),
   ; 
 
   int code; 

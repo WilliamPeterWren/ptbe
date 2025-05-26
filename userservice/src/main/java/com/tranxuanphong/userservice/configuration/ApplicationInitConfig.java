@@ -31,7 +31,9 @@ public class ApplicationInitConfig {
     @Bean 
     ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) { 
         return args -> {            
+
             Set<Role> roles = new HashSet<>();
+
             if (roleRepository.findById("ROLE_USER").isEmpty()) {
                 Permission permission = Permission.builder()
                 .name("ADD_TO_CART")
@@ -50,6 +52,24 @@ public class ApplicationInitConfig {
                 roles.add(userRole);
             }
 
+            if (roleRepository.findById("ROLE_STAFF").isEmpty()) {
+                Permission permission = Permission.builder()
+                .name("MANAGE_USER")
+                .description("add to cart ...")
+                .build();
+
+                Set<Permission> permissions = new HashSet<>();
+                permissions.add(permission);
+
+                Role staffRole = Role.builder()
+                        .name("ROLE_STAFF")
+                        .description("Standard user role")  
+                        .permissionIds(permissions)                      
+                        .build();
+                roleRepository.save(staffRole);
+                roles.add(staffRole);
+            }
+
             if (roleRepository.findById("ROLE_ADMIN").isEmpty()) {
                 Permission permission = Permission.builder()
                 .name("APPROVE_POST")
@@ -59,27 +79,25 @@ public class ApplicationInitConfig {
                 Set<Permission> permissions = new HashSet<>();
                 permissions.add(permission);
 
-
                 Role adminRole = Role.builder()
                         .name("ROLE_ADMIN")
                         .description("Administrator role")
                         .permissionIds(permissions)
                         .build();
                 roleRepository.save(adminRole);
-
-                if(userRepository.findByEmail("phongtx.it@gmail.com").isEmpty()){                     
-                    roles.add(adminRole);                    
-                    User user = User.builder() 
-                            .email("phongtx.it@gmail.com") 
-                            .password(passwordEncoder.encode("adminphong"))     
-                            .roles(roles)                
-                            .build();
-    
-                    userRepository.save(user); 
-                    log.warn("Default admin user created with default password admin, please change!");
-                } 
-                
+                roles.add(adminRole);  
             }
+       
+            if(userRepository.findByEmail("phongtx.it@gmail.com").isEmpty()){                     
+                User user = User.builder() 
+                        .email("phongtx.it@gmail.com") 
+                        .password(passwordEncoder.encode("adminphong"))     
+                        .roles(roles)                
+                        .build();
+
+                userRepository.save(user); 
+                log.warn("Default admin user created with default password admin, please change!");
+            } 
         }; 
     } 
 } 

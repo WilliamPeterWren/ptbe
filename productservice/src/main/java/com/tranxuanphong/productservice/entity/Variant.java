@@ -5,9 +5,10 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.LocalDate;
 
-@Document(collection = "variants")
 @Setter
 @Getter
 @NoArgsConstructor
@@ -15,10 +16,9 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class Variant {
-    @Id
-    String id;
 
-    String productId;
+    @JsonProperty("id")
+    String id;
 
     String variantName;
 

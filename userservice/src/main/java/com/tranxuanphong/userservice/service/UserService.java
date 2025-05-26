@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.tranxuanphong.userservice.dto.request.LoginRequest;
 import com.tranxuanphong.userservice.dto.request.RegisterRequest;
-import com.tranxuanphong.userservice.dto.request.UserUpdateRequest;
+import com.tranxuanphong.userservice.dto.request.UserUpdatePasswordRequest;
 import com.tranxuanphong.userservice.dto.response.LoginResponse;
 import com.tranxuanphong.userservice.dto.response.UserResponse;
 import com.tranxuanphong.userservice.entity.Role;
@@ -45,6 +45,7 @@ public class UserService {
   AuthenticationService authenticationService;
 
   public UserResponse register(RegisterRequest request){
+
     if(userRepository.existsByEmail(request.getEmail())){
       throw new AppException(ErrorCode.EMAIL_EXISTED);
     }
@@ -63,19 +64,18 @@ public class UserService {
     return userMapper.toUserResponse(userRepository.save(user));
   }
 
-  public UserResponse update(String email, UserUpdateRequest request){
-    User user = userRepository.findByEmail(email).orElseThrow(()-> new AppException(ErrorCode.EMAIL_EXISTED));
-    userMapper.updateUser(user, request);
+  public UserResponse updatePassword(UserUpdatePasswordRequest request){
+    String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
+    User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED)); 
+    
     user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-
-    userRepository.save(user);
-    return userMapper.toUserResponse(user);
+    return userMapper.toUserResponse(userRepository.save(user));
   }
 
-  @PostAuthorize("returnObject.username == authentication.name")
-  public UserResponse getUser(String email){
-    return userMapper.toUserResponse(userRepository.findByEmail(email).orElseThrow(()-> new AppException(ErrorCode.EMAIL_INVALID)));
+  public UserResponse getUser(){
+    String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
+    return userMapper.toUserResponse(userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED)));
   }
 
   @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -89,13 +89,6 @@ public class UserService {
     return userMapper.toListUserResponse(listUser);
   }
 
-  public UserResponse getMyInfo(){ 
-    String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
-    User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED)); 
-    
-    
-    return userMapper.toUserResponse(user); 
-  }
 
   public LoginResponse login(LoginRequest request) {
     User user = userRepository.findByEmail(request.getEmail())
@@ -119,25 +112,35 @@ public class UserService {
     return LoginResponse.builder()
             .accessToken(accessToken)
             .refreshToken(refreshToken)
+            .id(user.getId())
+            .email(user.getEmail())
             .build();
-    }
+  }
+
+  public UserResponse updateRole(String roleId){
+    String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
+    User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED)); 
+    Set<Role> roles = user.getRoles();
+    Role role = roleRepository.findById(roleId).orElseThrow(()-> new AppException(ErrorCode.ROLE_NOT_FOUND));
+    roles.add(role);
+    user.setRoles(roles);
+    return userMapper.toUserResponse(userRepository.save(user));
+  }
+
 
   // product
   public boolean checkId(String id){
-
-    log.info("id: " + id);
-//    return CheckIdResponse.builder()
-//    .check(userRepository.existsById(id))
-//    .build();
-
     return userRepository.existsById(id);
   }
 
-  public String getUserId(String email){
-    System.out.println("email 2: " + email);
-    User user = userRepository.findByEmail(email).orElseThrow(()-> new AppException(ErrorCode.UNAUTHENTICATED));
-    System.out.println("user: " + user.getId());
+  public boolean checkByEmail(String email){
+    return userRepository.existsByEmail(email);
+  }
 
+  
+
+  public String getUserId(String email){
+    User user = userRepository.findByEmail(email).orElseThrow(()-> new AppException(ErrorCode.UNAUTHENTICATED));
     return user.getId();
   }
 }

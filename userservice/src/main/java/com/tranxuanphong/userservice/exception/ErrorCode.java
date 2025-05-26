@@ -34,6 +34,7 @@ public enum ErrorCode {
   ADDRESS_INVALID(1016,"ADDRESS must be at least {min}", HttpStatus.BAD_REQUEST),
   INVALID_PHONE(1017,"Phone must be 10 characters", HttpStatus.BAD_REQUEST),
   CATEGORY_EXISTS(1018,"category exists",HttpStatus.BAD_REQUEST ),
+  USER_ADDRESS_NOT_MATCH(1018,"USER address conflic",HttpStatus.BAD_REQUEST ),
   ; 
 
   int code; 
