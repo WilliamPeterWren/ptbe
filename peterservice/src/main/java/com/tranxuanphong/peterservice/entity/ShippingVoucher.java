@@ -25,6 +25,7 @@ import lombok.experimental.FieldDefaults;
 public class ShippingVoucher {
   @Id
   String id;
+  String name;
   Long price;
   Instant expiredAt;
 }

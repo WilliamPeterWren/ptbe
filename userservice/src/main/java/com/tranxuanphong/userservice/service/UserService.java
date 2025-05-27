@@ -24,8 +24,8 @@ import com.tranxuanphong.userservice.entity.User;
 import com.tranxuanphong.userservice.exception.AppException;
 import com.tranxuanphong.userservice.exception.ErrorCode;
 import com.tranxuanphong.userservice.mapper.UserMapper;
-import com.tranxuanphong.userservice.repository.RoleRepository;
-import com.tranxuanphong.userservice.repository.UserRepository;
+import com.tranxuanphong.userservice.repository.mongo.RoleRepository;
+import com.tranxuanphong.userservice.repository.mongo.UserRepository;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

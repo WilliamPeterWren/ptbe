@@ -29,8 +29,7 @@ import com.tranxuanphong.userservice.dto.response.IntrospectResponse;
 import com.tranxuanphong.userservice.entity.User;
 import com.tranxuanphong.userservice.exception.AppException;
 import com.tranxuanphong.userservice.exception.ErrorCode;
-import com.tranxuanphong.userservice.repository.UserRepository;
-
+import com.tranxuanphong.userservice.repository.mongo.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.tranxuanphong.peterservice.dto.request.FlashSaleCreateRequest;
+import com.tranxuanphong.peterservice.dto.request.FlashSaleSellerUpdateRequest;
 import com.tranxuanphong.peterservice.dto.request.FlashSaleUpdateRequest;
 import com.tranxuanphong.peterservice.dto.response.ApiResponse;
 import com.tranxuanphong.peterservice.dto.response.FlashSaleResponse;
@@ -45,10 +46,17 @@ public class FlashSaleController {
   //   .build();
   // } 
 
-  @GetMapping("/get-products")
-  public ApiResponse<Page<FlashSaleResponse>> getProducts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+  @GetMapping("/get/flashsales")
+  public ApiResponse<Page<FlashSaleResponse>> getFlashSales(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
     return ApiResponse.<Page<FlashSaleResponse>>builder()
     .result(flashSaleService.getPaginatedFlashSales(page, size))
+    .build();
+  }
+
+  @GetMapping("/get/flashsales/available")
+  public ApiResponse<List<FlashSaleResponse>> getValidFlashSales() {
+    return ApiResponse.<List<FlashSaleResponse>>builder()
+    .result(flashSaleService.getValidFlashSales())
     .build();
   }
 
@@ -59,10 +67,17 @@ public class FlashSaleController {
     .build();
   } 
 
-  @PutMapping("/{id}")
-  public ApiResponse<FlashSaleResponse> update(@PathVariable String id, @RequestBody FlashSaleUpdateRequest request) {
+  @PutMapping("/update/staff/{id}")
+  public ApiResponse<FlashSaleResponse> updateByStaff(@PathVariable String id, @RequestBody FlashSaleUpdateRequest request) {
     return ApiResponse.<FlashSaleResponse>builder()
-    .result(flashSaleService.update(id, request))
+    .result(flashSaleService.updateByStaff(id, request))
+    .build();
+  } 
+
+  @PutMapping("/update/seller/{id}")
+  public ApiResponse<FlashSaleResponse> updateBySeller(@PathVariable String id, @RequestBody FlashSaleSellerUpdateRequest request) {
+    return ApiResponse.<FlashSaleResponse>builder()
+    .result(flashSaleService.updateBySeller(id, request))
     .build();
   } 
   

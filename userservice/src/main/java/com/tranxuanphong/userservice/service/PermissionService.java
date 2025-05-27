@@ -8,7 +8,7 @@ import com.tranxuanphong.userservice.dto.request.PermissionRequest;
 import com.tranxuanphong.userservice.dto.response.PermissionResponse;
 import com.tranxuanphong.userservice.entity.Permission;
 import com.tranxuanphong.userservice.mapper.PermissionMapper;
-import com.tranxuanphong.userservice.repository.PermissionRepository;
+import com.tranxuanphong.userservice.repository.mongo.PermissionRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

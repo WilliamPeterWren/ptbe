@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tranxuanphong.userservice.dto.request.ApiResponse;
 import com.tranxuanphong.userservice.dto.request.PermissionRequest;
+import com.tranxuanphong.userservice.dto.response.ApiResponse;
 import com.tranxuanphong.userservice.dto.response.PermissionResponse;
 import com.tranxuanphong.userservice.service.PermissionService;
 

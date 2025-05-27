@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults; 
 import org.springframework.web.bind.annotation.*;
 
-import com.tranxuanphong.userservice.dto.request.ApiResponse;
 import com.tranxuanphong.userservice.dto.request.RoleRequest;
+import com.tranxuanphong.userservice.dto.response.ApiResponse;
 import com.tranxuanphong.userservice.dto.response.RoleResponse;
 import com.tranxuanphong.userservice.service.RoleService;
 

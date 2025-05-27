@@ -12,8 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.tranxuanphong.userservice.entity.User;
 import com.tranxuanphong.userservice.entity.Role;
 import com.tranxuanphong.userservice.entity.Permission;
-import com.tranxuanphong.userservice.repository.RoleRepository;
-import com.tranxuanphong.userservice.repository.UserRepository;
+import com.tranxuanphong.userservice.repository.mongo.RoleRepository;
+import com.tranxuanphong.userservice.repository.mongo.UserRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

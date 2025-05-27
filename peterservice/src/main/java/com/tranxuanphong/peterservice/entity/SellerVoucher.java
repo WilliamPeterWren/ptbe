@@ -3,8 +3,7 @@ package com.tranxuanphong.peterservice.entity;
 import java.time.Instant;
 
 import org.springframework.data.annotation.Id;
-
-
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AccessLevel;
@@ -27,6 +26,8 @@ public class SellerVoucher {
   String id;
   String sellerId;
   String name;
+
+  @Indexed(unique = true)
   String slug;
   Long value;
   Long minPurchase;

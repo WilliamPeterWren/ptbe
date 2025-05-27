@@ -15,5 +15,5 @@ public interface ProductClient {
   boolean existsByProductId(@PathVariable String id);
 
   @GetMapping(value ="/api/products/product/id/{productId}/seller/id/{sellerId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  boolean productBySeller(@PathVariable String productId, @PathVariable String sellerId);
+  boolean doesProductExistBySellerId(@PathVariable String productId, @PathVariable String sellerId);
 }

@@ -1,4 +1,4 @@
-package com.tranxuanphong.userservice.repository;
+package com.tranxuanphong.userservice.repository.mongo;
 
 import com.tranxuanphong.userservice.entity.Address;
 import org.springframework.data.mongodb.repository.MongoRepository;

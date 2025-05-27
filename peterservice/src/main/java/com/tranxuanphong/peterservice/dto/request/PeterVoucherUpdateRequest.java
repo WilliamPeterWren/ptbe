@@ -5,8 +5,8 @@ import java.time.Instant;
 import lombok.Getter;
 
 @Getter
-public class FlashSaleUpdateRequest {
+public class PeterVoucherUpdateRequest {
   String name;
-  Instant startedAt;
+  Long value;
   Instant expiredAt;
 }

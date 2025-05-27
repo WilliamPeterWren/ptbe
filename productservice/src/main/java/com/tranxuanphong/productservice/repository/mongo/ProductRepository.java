@@ -25,5 +25,7 @@ public interface ProductRepository extends MongoRepository<Product, String> {
   boolean existsByVariantId(String variantId);
 
   boolean existsByCategoryId(String id);
+
+  List<Product> findByIdIn(List<String> ids);
 }
 

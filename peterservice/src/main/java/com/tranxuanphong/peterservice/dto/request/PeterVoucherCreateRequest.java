@@ -2,11 +2,12 @@ package com.tranxuanphong.peterservice.dto.request;
 
 import java.time.Instant;
 
+
 import lombok.Getter;
 
 @Getter
-public class FlashSaleUpdateRequest {
+public class PeterVoucherCreateRequest {
   String name;
-  Instant startedAt;
+  Long value;
   Instant expiredAt;
 }

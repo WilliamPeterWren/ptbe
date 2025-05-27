@@ -10,8 +10,8 @@ import com.tranxuanphong.userservice.dto.response.RoleResponse;
 import com.tranxuanphong.userservice.entity.Permission;
 import com.tranxuanphong.userservice.entity.Role;
 import com.tranxuanphong.userservice.mapper.RoleMapper;
-import com.tranxuanphong.userservice.repository.PermissionRepository;
-import com.tranxuanphong.userservice.repository.RoleRepository;
+import com.tranxuanphong.userservice.repository.mongo.PermissionRepository;
+import com.tranxuanphong.userservice.repository.mongo.RoleRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

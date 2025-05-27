@@ -42,7 +42,7 @@ public class CartController {
     .build();
   }
 
-  @PostMapping
+  @PostMapping("/addtocart")
   public ApiResponse<CartResponse> addToCart(@RequestBody AddToCartRequest request) {
     return ApiResponse.<CartResponse>builder()
       .result(cartService.addToCart(request))

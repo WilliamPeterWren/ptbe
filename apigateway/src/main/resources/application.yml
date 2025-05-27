@@ -43,7 +43,7 @@ spring:
         - id: peterservice
           uri: lb://peterservice
           predicates:
-           - Path=/api/petercategories/**,/api/flashsales/**
+           - Path=/api/petercategories/**,/api/flashsales/**,/api/vouchers/**,/api/product-vouchers/**,/api/seller-vouchers/**,/api/shipping-vouchers/**
   main:
     web-application-type: reactive
 server:

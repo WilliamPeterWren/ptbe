@@ -1,6 +1,8 @@
 package com.tranxuanphong.peterservice.entity;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.data.annotation.Id;
 
@@ -25,7 +27,11 @@ import lombok.experimental.FieldDefaults;
 public class FlashSale {
   @Id
   String id;
-  String productId;
-  Long price;
+  String name;
+  String slug;
+
+  @Builder.Default
+  Set<FlashSaleItem> flashSaleItems = new HashSet<>();
+  Instant startedAt;
   Instant expiredAt;
 }

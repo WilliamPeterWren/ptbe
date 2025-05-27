@@ -1,4 +1,4 @@
-package com.tranxuanphong.userservice.dto.request;
+package com.tranxuanphong.userservice.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

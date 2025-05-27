@@ -8,9 +8,9 @@ import com.tranxuanphong.userservice.entity.Address;
 import com.tranxuanphong.userservice.entity.User;
 import com.tranxuanphong.userservice.exception.ErrorCode;
 import com.tranxuanphong.userservice.mapper.AddressMapper;
-import com.tranxuanphong.userservice.repository.AddressRepository;
-import com.tranxuanphong.userservice.repository.UserRepository;
 import com.tranxuanphong.userservice.repository.httpclient.OrderClient;
+import com.tranxuanphong.userservice.repository.mongo.AddressRepository;
+import com.tranxuanphong.userservice.repository.mongo.UserRepository;
 import com.tranxuanphong.userservice.exception.AppException;
 
 import lombok.AccessLevel;

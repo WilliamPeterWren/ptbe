@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nimbusds.jose.JOSEException;
-import com.tranxuanphong.userservice.dto.request.ApiResponse;
 import com.tranxuanphong.userservice.dto.request.AuthenticationRequest;
 import com.tranxuanphong.userservice.dto.request.IntrospectRequest;
+import com.tranxuanphong.userservice.dto.response.ApiResponse;
 import com.tranxuanphong.userservice.dto.response.AuthenticationResponse;
 import com.tranxuanphong.userservice.dto.response.IntrospectResponse;
 import com.tranxuanphong.userservice.service.AuthenticationService;

@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 public class FlashSaleCreateRequest {
-  String productId;
-  Long price;
+  String name;
+  Instant startedAt;
   Instant expiredAt;
 }

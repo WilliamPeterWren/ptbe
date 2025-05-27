@@ -31,7 +31,11 @@ public class SecurityConfig {
 
   private final String[] PUBLIC_ENDPOINTS_GET = {
     "/api/flashsales/**",
-    "api/petercategories/**"
+    "/api/petercategories/**",
+    "/api/vouchers/**",
+    "/api/product-vouchers/**",
+    "/api/seller-vouchers/**",
+    "/api/shipping-vouchers/**"
   };
 
   // private String signerKey = "WjG25z4tA+dZX3clK+u0/kRg1tCdV6vvaizOfsJLgy4HFasdkfwxKso+KlGArOm4uOdkai";
