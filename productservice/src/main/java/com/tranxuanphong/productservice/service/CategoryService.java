@@ -45,14 +45,6 @@ public class CategoryService {
 
     String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
     String sellerId = userClient.userId(email);
-
-    Set<String> peterCategories = request.getPeterCategories();
-    for(String id: peterCategories){
-      if(!peterClient.existsId(id)){
-        throw new AppException(ErrorCode.PETER_CATEGORY_NOT_EXISTS);
-      }
-    }
-
     List<Category> categories = categoryRepository.findBySellerId(sellerId);
     for(Category c: categories){
       if(c.getCategoryName().equals(request.getCategoryName())){
@@ -88,13 +80,6 @@ public class CategoryService {
   public CategoryResponse update(String slug, CategoryUpdateRequest request){
     String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
     String sellerId = userClient.userId(email);
-
-    Set<String> peterCategories = request.getPeterCategories();
-    for(String id: peterCategories){
-      if(!peterClient.existsId(id)){
-        throw new AppException(ErrorCode.PETER_CATEGORY_NOT_EXISTS);
-      }
-    }
 
     List<Category> categories = categoryRepository.findBySellerId(sellerId);
     for(Category c: categories){

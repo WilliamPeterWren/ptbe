@@ -1,6 +1,6 @@
 package com.tranxuanphong.productservice.dto.response;
 
-import java.util.Set;
+import java.time.Instant;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +11,7 @@ public class CategoryResponse {
   String id;
   String sellerId;
   String categoryName;
-  Set<String> peterCategories;
   String slug;
+  Instant createdAt;
+  Instant updatedAt;
 }

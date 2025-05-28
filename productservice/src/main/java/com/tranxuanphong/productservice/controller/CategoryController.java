@@ -1,14 +1,12 @@
 package com.tranxuanphong.productservice.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tranxuanphong.productservice.dto.request.CategoryCreateRequest;
 import com.tranxuanphong.productservice.dto.request.CategoryUpdateRequest;
 import com.tranxuanphong.productservice.dto.response.ApiResponse;
 import com.tranxuanphong.productservice.dto.response.CategoryResponse;
-import com.tranxuanphong.productservice.entity.Category;
 import com.tranxuanphong.productservice.service.CategoryService;
 
 import lombok.AccessLevel;

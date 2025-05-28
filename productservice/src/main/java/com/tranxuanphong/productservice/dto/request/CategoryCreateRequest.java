@@ -14,8 +14,4 @@ public class CategoryCreateRequest {
   @NotBlank(message = "Category name is required")
   @Size(min = 1, max = 32, message = "CATEGORYNAME_INVALID")
   String categoryName;
-  
-  @NotBlank(message = "Category name is required")
-  @Size(min = 1, max = 32, message = "CATEGORYNAME_INVALID")
-  Set<String> peterCategories;
 }

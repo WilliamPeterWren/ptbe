@@ -13,6 +13,8 @@ public class ProductUpdateRequest {
 
   String categoryId;
 
+  String peterCategory;
+
   Set<String> productImages;
 
   String description;

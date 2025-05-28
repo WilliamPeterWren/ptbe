@@ -11,7 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.tranxuanphong.userservice.entity.User;
 import com.tranxuanphong.userservice.entity.Role;
-import com.tranxuanphong.userservice.entity.Permission;
 import com.tranxuanphong.userservice.repository.mongo.RoleRepository;
 import com.tranxuanphong.userservice.repository.mongo.UserRepository;
 
@@ -35,54 +34,36 @@ public class ApplicationInitConfig {
             Set<Role> roles = new HashSet<>();
 
             if (roleRepository.findById("ROLE_USER").isEmpty()) {
-                Permission permission = Permission.builder()
-                .name("ADD_TO_CART")
-                .description("add to cart ...")
-                .build();
-
-                Set<Permission> permissions = new HashSet<>();
-                permissions.add(permission);
-
                 Role userRole = Role.builder()
                         .name("ROLE_USER")
                         .description("Standard user role")  
-                        .permissionIds(permissions)                      
                         .build();
                 roleRepository.save(userRole);
                 roles.add(userRole);
             }
 
             if (roleRepository.findById("ROLE_STAFF").isEmpty()) {
-                Permission permission = Permission.builder()
-                .name("MANAGE_USER")
-                .description("add to cart ...")
-                .build();
-
-                Set<Permission> permissions = new HashSet<>();
-                permissions.add(permission);
-
                 Role staffRole = Role.builder()
                         .name("ROLE_STAFF")
-                        .description("Standard user role")  
-                        .permissionIds(permissions)                      
+                        .description("Standard staff role")  
                         .build();
                 roleRepository.save(staffRole);
                 roles.add(staffRole);
             }
 
-            if (roleRepository.findById("ROLE_ADMIN").isEmpty()) {
-                Permission permission = Permission.builder()
-                .name("APPROVE_POST")
-                .description("approve post ...")
-                .build();
+            if (roleRepository.findById("ROLE_SELLER").isEmpty()) {
+                Role staffRole = Role.builder()
+                        .name("ROLE_SELLER")
+                        .description("Standard seller role")  
+                        .build();
+                roleRepository.save(staffRole);
+                roles.add(staffRole);
+            }
 
-                Set<Permission> permissions = new HashSet<>();
-                permissions.add(permission);
-
+            if (roleRepository.findById("ROLE_ADMIN").isEmpty()) {       
                 Role adminRole = Role.builder()
                         .name("ROLE_ADMIN")
                         .description("Administrator role")
-                        .permissionIds(permissions)
                         .build();
                 roleRepository.save(adminRole);
                 roles.add(adminRole);  

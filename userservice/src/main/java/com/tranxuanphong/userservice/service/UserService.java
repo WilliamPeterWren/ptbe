@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -60,6 +59,7 @@ public class UserService {
     Set<Role> roles = new HashSet<>();
     roles.add(userRole);
     user.setRoles(roles);
+    user.setUsername(request.getEmail());
     
     return userMapper.toUserResponse(userRepository.save(user));
   }
@@ -68,7 +68,12 @@ public class UserService {
     String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
     User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED)); 
     
-    user.setPassword(passwordEncoder.encode(request.getPassword()));
+    if(request.getPassword() != null)
+      user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+    if(request.getUsername() != null && userRepository.existsByUsername(request.getUsername())){
+      user.setUsername(request.getUsername());
+    }
 
     return userMapper.toUserResponse(userRepository.save(user));
   }
@@ -114,6 +119,9 @@ public class UserService {
             .refreshToken(refreshToken)
             .id(user.getId())
             .email(user.getEmail())
+            .username(user.getUsername())
+            .roles(user.getRoles())
+            .addressId(user.getAddressId())
             .build();
   }
 

@@ -7,9 +7,9 @@ import lombok.Getter;
 
 @Getter
 public class UserUpdatePasswordRequest{
-  @NotBlank(message = "Password is required")
-  @Size(min = 8, max = 32, message = "Password must be at least 8 characters") 
+
   String password;
 
+  String username;
   
 }

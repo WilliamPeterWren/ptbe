@@ -13,6 +13,7 @@ import com.tranxuanphong.productservice.exception.AppException;
 import com.tranxuanphong.productservice.exception.ErrorCode;
 import com.tranxuanphong.productservice.mapper.ProductMapper;
 import com.tranxuanphong.productservice.repository.httpclient.OrderClient;
+import com.tranxuanphong.productservice.repository.httpclient.PeterClient;
 // import com.tranxuanphong.productservice.repository.elasticsearch.ProductElasticsearchRepository;
 import com.tranxuanphong.productservice.repository.httpclient.UserClient;
 import com.tranxuanphong.productservice.repository.mongo.CategoryRepository;
@@ -32,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.modelmapper.ModelMapper;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +53,7 @@ public class ProductService {
 
   UserClient userClient;
   OrderClient orderClient;
+  PeterClient peterClient;
 
   GenerateSlug generateSlug;
   GenerateUUID generateUUID;
@@ -59,13 +62,22 @@ public class ProductService {
 
   @PreAuthorize("hasRole('ROLE_SELLER')")
   public ProductResponse create(ProductCreateRequest request){
+    System.out.println("yes 00");
     String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
     String sellerId = userClient.userId(email);
+    System.out.println("yes 01");
 
     Category category = categoryRepository.findById(request.getCategoryId()).orElseThrow(() -> new AppException(ErrorCode.CATEGORYID_INVALID));
     if(!category.getSellerId().equals(sellerId)){
       throw new AppException(ErrorCode.CATEGORY_SELLER_NOT_MATCH);
     }
+    System.out.println("yes 02");
+
+    if(!peterClient.existsInPeterCategoryId(request.getPeterCategory())){
+      throw new AppException(ErrorCode.CATEGORYID_INVALID);
+    }
+    System.out.println("yes 03");
+
 
     List<Product> products = productRepository.findBySellerId(sellerId);
     for(Product prod: products){
@@ -73,6 +85,8 @@ public class ProductService {
         throw new AppException(ErrorCode.PRODUCT_EXISTS);
       }
     }
+    System.out.println("yes 04");
+
 
     String slug = generateSlug.generateSlug(request.getProductName());
 
@@ -99,6 +113,7 @@ public class ProductService {
     .sellerId(sellerId)
     .productName(request.getProductName())
     .categoryId(request.getCategoryId())
+    .peterCategory(request.getPeterCategory())
     .productImages(request.getProductImages())
     .variants(variants)
     .infos(infos)
@@ -120,12 +135,17 @@ public class ProductService {
       throw new AppException(ErrorCode.SELLER_NOT_EXIST);
     }
     
-    Page<Product> list = productRepository.findBySellerId(sellerId, PageRequest.of(page, size));
+    Page<Product> list = productRepository.findBySellerIdOrderByCreatedAtDesc(sellerId, PageRequest.of(page, size));
     return list.map(product -> modelMapper.map(product, ProductResponse.class));
   }
 
-  public ProductResponse getOne(String slug){
+  public ProductResponse getOneBySlug(String slug){
     Product product = productRepository.findBySlug(slug).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTS));
+    return productMapper.toProductResponse(product);
+  }
+
+  public ProductResponse getOneById(String id){
+    Product product = productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTS));
     return productMapper.toProductResponse(product);
   }
 
@@ -275,6 +295,8 @@ public class ProductService {
   
       product.setInfos(currentInfos);
     } 
+
+    product.setUpdatedAt(Instant.now());
 
     // productElasticsearchRepository.save(updated);
     

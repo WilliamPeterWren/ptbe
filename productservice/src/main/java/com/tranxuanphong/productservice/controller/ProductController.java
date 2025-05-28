@@ -51,10 +51,17 @@ public class ProductController {
     .build();
   }
 
-  @GetMapping("/{slug}")
-  public ApiResponse<ProductResponse> getOne(@PathVariable String slug) {
+  @GetMapping("/slug/{slug}")
+  public ApiResponse<ProductResponse> getOneBySlug(@PathVariable String slug) {
     return ApiResponse.<ProductResponse>builder()
-    .result(productService.getOne(slug))
+    .result(productService.getOneBySlug(slug))
+    .build();
+  }
+
+  @GetMapping("/id/{id}")
+  public ApiResponse<ProductResponse> getOne(@PathVariable String id) {
+    return ApiResponse.<ProductResponse>builder()
+    .result(productService.getOneById(id))
     .build();
   }
 

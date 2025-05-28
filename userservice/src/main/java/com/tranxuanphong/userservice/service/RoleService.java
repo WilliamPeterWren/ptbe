@@ -7,10 +7,8 @@ import org.springframework.stereotype.Service;
 
 import com.tranxuanphong.userservice.dto.request.RoleRequest;
 import com.tranxuanphong.userservice.dto.response.RoleResponse;
-import com.tranxuanphong.userservice.entity.Permission;
 import com.tranxuanphong.userservice.entity.Role;
 import com.tranxuanphong.userservice.mapper.RoleMapper;
-import com.tranxuanphong.userservice.repository.mongo.PermissionRepository;
 import com.tranxuanphong.userservice.repository.mongo.RoleRepository;
 
 import lombok.AccessLevel;
@@ -24,14 +22,10 @@ public class RoleService {
   RoleRepository roleRepository;
   RoleMapper roleMapper;
 
-  PermissionRepository permissionRepository;
   
    public RoleResponse create(RoleRequest request){ 
         Role role = roleMapper.toRole(request); 
-        List<Permission> permissions = permissionRepository.findAllById(request.getPermissionIds()); 
-        role.setPermissionIds(new HashSet<>(permissions)); 
-        roleRepository.save(role); 
-        return roleMapper.toRoleResponse(role); 
+        return roleMapper.toRoleResponse(roleRepository.save(role)); 
     } 
  
     public List<RoleResponse> getAll(){ 

@@ -18,6 +18,7 @@ public interface ProductRepository extends MongoRepository<Product, String> {
   Optional<Product> findBySlug(String slug);
   boolean existsById(String id);
   Page<Product> findBySellerId(String sellerId, Pageable pageable);
+  Page<Product> findBySellerIdOrderByCreatedAtDesc(String sellerId, Pageable pageable);
 
   List<Product> findBySellerId(String sellerId);
 

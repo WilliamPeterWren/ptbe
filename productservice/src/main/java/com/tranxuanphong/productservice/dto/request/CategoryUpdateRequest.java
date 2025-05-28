@@ -7,6 +7,4 @@ import lombok.Getter;
 @Getter
 public class CategoryUpdateRequest {
   String categoryName;
-
-  Set<String> peterCategories;
 }

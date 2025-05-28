@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 // import org.springframework.data.elasticsearch.annotations.Field;
 // import org.springframework.data.elasticsearch.annotations.FieldType;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,13 +34,10 @@ public class Category {
     String slug;
 
     @Builder.Default
-    Set<String> peterCategories = new HashSet<>();
+    // @Field(type = FieldType.Date)
+    Instant createdAt = Instant.now();
 
     @Builder.Default
     // @Field(type = FieldType.Date)
-    LocalDate createdAt = LocalDate.now();
-
-    @Builder.Default
-    // @Field(type = FieldType.Date)
-    LocalDate updatedAt = LocalDate.now();
+    Instant updatedAt = Instant.now();
 }

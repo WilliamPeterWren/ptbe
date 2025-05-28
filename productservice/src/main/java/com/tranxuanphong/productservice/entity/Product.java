@@ -1,5 +1,6 @@
 package com.tranxuanphong.productservice.entity;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -45,6 +46,8 @@ public class Product {
     // @Field(type = FieldType.Text)
     String categoryId;
 
+    String peterCategory;
+
     @Builder.Default
     // @Field(type = FieldType.Nested)
     Set<String> productImages = new HashSet<>();
@@ -63,10 +66,13 @@ public class Product {
     String description;
 
     @Builder.Default
-    // @Field(type = FieldType.Date)
-    LocalDate createdAt = LocalDate.now();
+    boolean isActive = true;
 
     @Builder.Default
     // @Field(type = FieldType.Date)
-    LocalDate updatedAt = LocalDate.now();
+    Instant createdAt = Instant.now();
+
+    @Builder.Default
+    // @Field(type = FieldType.Date)
+    Instant updatedAt = Instant.now();
 }

@@ -1,5 +1,6 @@
 package com.tranxuanphong.productservice.dto.request;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.tranxuanphong.productservice.entity.Info;
@@ -23,6 +24,8 @@ public class ProductCreateRequest {
   @NotBlank(message = "CATEGORY name is required")
   @Size(min = 1, max = 32, message = "CATEGORYID_INVALID")
   String categoryId;
+  
+  String peterCategory;
 
   Set<String> productImages;
 

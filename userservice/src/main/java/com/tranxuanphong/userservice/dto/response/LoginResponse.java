@@ -1,5 +1,9 @@
 package com.tranxuanphong.userservice.dto.response;
 
+import java.util.Set;
+
+import com.tranxuanphong.userservice.entity.Role;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,4 +17,7 @@ public class LoginResponse {
   String refreshToken;
   String id;
   String email;
+  String username;
+  Set<Role> roles;
+  String addressId;
 }

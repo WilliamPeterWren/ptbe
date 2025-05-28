@@ -7,27 +7,37 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class FileService {
-    private static final String UPLOAD_DIR = "/uploads/images/";
+    private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/fileservice/src/main/resources/static/images/product";
 
-    public String saveFile(MultipartFile file) throws IOException {
-        if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("File cannot be empty");
-        }
-        if (!file.getContentType().startsWith("image/")) {
-            throw new IllegalArgumentException("File must be an image");
+    public List<String> saveFiles(List<MultipartFile> files) throws IOException {
+        if (files == null || files.isEmpty()) {
+            throw new IllegalArgumentException("File list cannot be empty");
         }
 
-        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-        Path filePath = Paths.get(UPLOAD_DIR, fileName);
+        List<String> fileNames = new ArrayList<>();
+        for (MultipartFile file : files) {
+            if (file.isEmpty()) {
+                throw new IllegalArgumentException("File cannot be empty: " + file.getOriginalFilename());
+            }
+            if (!file.getContentType().startsWith("image/")) {
+                throw new IllegalArgumentException("File must be an image: " + file.getOriginalFilename());
+            }
 
-        Files.createDirectories(filePath.getParent());
+            // String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            String fileName = file.getOriginalFilename();
+            System.out.println("original name: " + fileName);
+            Path filePath = Paths.get(UPLOAD_DIR, fileName);
 
-        Files.write(filePath, file.getBytes());
+            Files.createDirectories(filePath.getParent());
+            Files.write(filePath, file.getBytes());
 
-        return fileName;
+            fileNames.add(fileName);
+        }
+        return fileNames;
     }
 }

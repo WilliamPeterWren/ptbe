@@ -31,7 +31,8 @@ public class SecurityConfig {
 
   private final String[] PUBLIC_ENDPOINTS_GET = {
 
-    "/api/products/{slug}",
+    "/api/products/slug/{slug}",
+    "/api/products/id/{id}",
 
     "/api/categories/{slug}",
     "/api/categories/get-by-sellerid/{sellerId}",

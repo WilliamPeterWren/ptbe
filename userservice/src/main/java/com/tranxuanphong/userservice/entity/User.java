@@ -29,6 +29,9 @@ public class User {
 
   @Indexed(unique = true)
   String email;
+
+  String username;
+
   String password;
 
   @Builder.Default

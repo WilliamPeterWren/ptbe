@@ -24,7 +24,4 @@ public class Role {
   @Id 
   String name; 
   String description; 
-  
-  @Builder.Default
-  Set<Permission> permissionIds = new HashSet<>();
 }

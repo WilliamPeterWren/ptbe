@@ -1,5 +1,6 @@
 package com.tranxuanphong.productservice.dto.response;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -20,6 +21,8 @@ public class ProductResponse {
 
   String categoryId;
 
+  String peterCategory;
+
   Set<String> productImages;
 
   Set<Variant> variants;
@@ -30,7 +33,7 @@ public class ProductResponse {
 
   String description;
 
-  LocalDate createdAt;
+  Instant createdAt;
 
-  LocalDate updatedAt;
+  Instant updatedAt;
 }
