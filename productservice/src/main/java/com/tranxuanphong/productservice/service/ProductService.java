@@ -4,6 +4,8 @@ import org.springframework.stereotype.Service;
 
 import com.tranxuanphong.productservice.dto.request.ProductCreateRequest;
 import com.tranxuanphong.productservice.dto.request.ProductUpdateRequest;
+import com.tranxuanphong.productservice.dto.response.CartProductResponse;
+import com.tranxuanphong.productservice.dto.response.FlashSaleProductResponse;
 import com.tranxuanphong.productservice.dto.response.ProductResponse;
 import com.tranxuanphong.productservice.entity.Category;
 import com.tranxuanphong.productservice.entity.Info;
@@ -29,21 +31,24 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
 
 import org.modelmapper.ModelMapper;
 
+import java.text.Normalizer;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @AllArgsConstructor
-@Slf4j
 public class ProductService {
   ProductRepository productRepository;
   CategoryRepository categoryRepository;
@@ -57,8 +62,6 @@ public class ProductService {
 
   GenerateSlug generateSlug;
   GenerateUUID generateUUID;
-
-  // ProductElasticsearchRepository productElasticsearchRepository;
 
   @PreAuthorize("hasRole('ROLE_SELLER')")
   public ProductResponse create(ProductCreateRequest request){
@@ -95,6 +98,7 @@ public class ProductService {
         .id(generateUUID.generateUuid())
         .variantName(v.getVariantName())
         .price(v.getPrice())
+        .salePrice(v.getSalePrice())
         .stock(v.getStock())
         .createdAt(LocalDate.now())
         .updatedAt(LocalDate.now())
@@ -151,20 +155,20 @@ public class ProductService {
 
   @PreAuthorize("hasRole('ROLE_SELLER')")
   public ProductResponse updateById(String id, ProductUpdateRequest request){
-
     String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
     String sellerId = userClient.userId(email);
 
-    if(request.getCategoryId() != null){
+    if(request.getCategoryId() != null && !request.getCategoryId().isEmpty() ){
       Category category = categoryRepository.findById(request.getCategoryId()).orElseThrow(() -> new AppException(ErrorCode.CATEGORYID_INVALID));
       if(!category.getSellerId().equals(sellerId)){
         throw new AppException(ErrorCode.CATEGORY_SELLER_NOT_MATCH);
       }
     }
 
+
     Product product = productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTS));
 
-    if(request.getProductName() != null){
+    if(request.getProductName() != null && !request.getProductName().equals(product.getProductName()) && !request.getProductName().isEmpty() ){
       List<Product> products = productRepository.findBySellerId(sellerId);
       for(Product prod: products){
         if(prod.getProductName().equals(request.getProductName())){
@@ -177,20 +181,25 @@ public class ProductService {
       product.setSlug(updateSlug);
     }
 
-    if(request.getCategoryId() != null){
+    if(request.getCategoryId() != null && !request.getCategoryId().equals(product.getCategoryId()) && !request.getCategoryId().isEmpty() ){
       product.setCategoryId(request.getCategoryId());
     }
 
-    if(request.getProductImages() != null){
+
+    if(request.getProductImages() != null && !request.getProductImages().equals(product.getProductImages()) && !request.getProductImages().isEmpty()){
+      System.out.println("update images");
       product.setProductImages(request.getProductImages());
     }
+    System.out.println("upddate product images");
 
-    if(request.getDescription() != null){
+    if(request.getDescription() != null &&  !request.getDescription().equals(product.getDescription()) && !request.getDescription().isEmpty() ){
       product.setDescription(request.getDescription());
     }
 
-    if (request.getVariants() != null) {
+    if (request.getVariants() != null && !request.getVariants().equals(product.getVariants()) && !request.getVariants().isEmpty()) {
+      System.out.println("variant asldkalsdjl");
       Set<Variant> currentVariants = product.getVariants();
+ 
       Set<Variant> requestVariants = request.getVariants();
   
       Map<String, Variant> variantNameMap = currentVariants.stream()
@@ -200,6 +209,7 @@ public class ProductService {
         boolean isNewVariant = newVariant.getId() == null || newVariant.getId().isEmpty();
   
         if (isNewVariant) {
+          System.out.println("new ...");
           if (variantNameMap.containsKey(newVariant.getVariantName())) {
             throw new AppException(ErrorCode.VARIANT_NAME_INVALID);
           }
@@ -207,61 +217,87 @@ public class ProductService {
           Variant variant = Variant.builder()
             .variantName(newVariant.getVariantName())
             .price(newVariant.getPrice())
+            .salePrice(newVariant.getSalePrice())
             .stock(newVariant.getStock())
             .build();
   
           currentVariants.add(variant);
           variantNameMap.put(variant.getVariantName(), variant); 
         } else {
-          Variant match = currentVariants.stream()
-            .filter(v -> newVariant.getId().equals(v.getId()))
-            .findFirst()
-            .orElse(null);
+          System.out.println("old ......");
+          for(Variant match: currentVariants){
+            if(match.getId().equals(newVariant.getId())){
+            
+              // boolean isSame =
+              // match.getVariantName().equals(newVariant.getVariantName()) &&
+              // match.getPrice().equals(newVariant.getPrice()) &&
+              // match.getSalePrice().equals(newVariant.getSalePrice()) &&
+              // match.getStock().equals(newVariant.getStock());
 
-          if (match == null) continue; 
+            
+              
+              System.out.println("yens ....");
+  
+              // if (isSame) {
+              //   throw new AppException(ErrorCode.VARIANT_EXISTS);
+              // }
 
-          boolean isSame =
-            match.getVariantName().equals(newVariant.getVariantName()) &&
-            match.getPrice().equals(newVariant.getPrice()) &&
-            match.getStock().equals(newVariant.getStock());
+              // if(match.equals(newVariant)){
+              //   System.out.println("over ride.....");
+              //   throw new AppException(ErrorCode.VARIANT_EXISTS);
+              // }
 
-          if (isSame) {
-            throw new AppException(ErrorCode.VARIANT_EXISTS);
-          }
+  System.out.println("not same");
+              String newName = newVariant.getVariantName();
+              if (newName != null && !newName.isEmpty() &&
+                !newName.equals(match.getVariantName())) {
+    
+                if (variantNameMap.containsKey(newName)) {
+                  throw new AppException(ErrorCode.VARIANT_NAME_INVALID);
+                }
+    
+                match.setVariantName(newName);
+              }
 
-          String newName = newVariant.getVariantName();
-          if (newName != null && !newName.isEmpty() &&
-            !newName.equals(match.getVariantName())) {
+              System.out.println("new name.........");
+    
+    
+              if (newVariant.getPrice() != null && !newVariant.getPrice().equals(match.getPrice())) {
+                match.setPrice(newVariant.getPrice());
+              }
 
-            if (variantNameMap.containsKey(newName)) {
-              throw new AppException(ErrorCode.VARIANT_NAME_INVALID);
+              System.out.println("price........");
+
+              if (newVariant.getSalePrice() != null && !newVariant.getSalePrice().equals(match.getSalePrice())) {
+                match.setSalePrice(newVariant.getSalePrice());
+              }
+
+              System.out.println("sale........");
+    
+              if (newVariant.getStock() != null && !newVariant.getStock().equals(match.getStock())) {
+                match.setStock(newVariant.getStock());
+              }
+              match.setUpdatedAt(LocalDate.now());
+              break;
             }
-
-            match.setVariantName(newName);
           }
-
-          if (newVariant.getPrice() != null) {
-            match.setPrice(newVariant.getPrice());
-          }
-
-          if (newVariant.getStock() != null) {
-            match.setStock(newVariant.getStock());
-          }
-
-          match.setUpdatedAt(LocalDate.now());
+        
         }
       }
   
       product.setVariants(currentVariants);
     }
 
-    if (request.getInfos() != null) {
+    System.out.println("upddate product variant");
+
+
+    if (request.getInfos() != null && !request.getInfos().equals(product.getInfos()) && !request.getInfos().isEmpty()) {
+      
       Set<Info> currentInfos = product.getInfos();
       Set<Info> requestInfos = request.getInfos();
   
-      Map<String, Info> infoIdMap = currentInfos.stream()
-        .filter(info -> info.getId() != null && !info.getId().isEmpty())
-        .collect(Collectors.toMap(Info::getId, info -> info));
+      Map<String, Info> infoNameMap = currentInfos.stream()
+        .collect(Collectors.toMap(Info::getName, i -> i, (a, b) -> a));
   
       for (Info newInfo : requestInfos) {
         boolean isNewInfo = newInfo.getId() == null || newInfo.getId().isEmpty();
@@ -279,22 +315,46 @@ public class ProductService {
             .build()
           );
         } else {
-            Info existingInfo = infoIdMap.get(newInfo.getId());
-            if (existingInfo == null) continue; 
 
-            boolean isSame =
-              existingInfo.getName().equals(newInfo.getName()) &&
-              existingInfo.getDetail().equals(newInfo.getDetail());
-
-            if (isSame) continue; 
-
-            existingInfo.setName(newInfo.getName());
-            existingInfo.setDetail(newInfo.getDetail());
+          for(Info match: currentInfos){
+            if(match.getId().equals(newInfo.getId())){
+            
+              boolean isSame =
+              match.getName().equals(newInfo.getName()) &&           
+              match.getDetail().equals(newInfo.getDetail());
+  
+              if (isSame) {
+                throw new AppException(ErrorCode.INFO_EXISTS);
+              }
+  
+              String newName = newInfo.getName();
+              if (newName != null && !newName.isEmpty() &&
+                !newName.equals(match.getName())) {
+    
+                if (infoNameMap.containsKey(newName)) {
+                  throw new AppException(ErrorCode.INFO_NAME_DUPLICATE);
+                }
+    
+                match.setName(newName);
+              }
+    
+    
+              if (newInfo.getDetail() != null && !newInfo.getDetail().equals(match.getDetail())) {
+                match.setDetail(newInfo.getDetail());
+              }
+    
+         
+              break;
+            }
+          }
+        
           }
       }
   
       product.setInfos(currentInfos);
     } 
+
+    System.out.println("upddate product info");
 
     product.setUpdatedAt(Instant.now());
 
@@ -305,10 +365,13 @@ public class ProductService {
 
   @PreAuthorize("hasRole('ROLE_SELLER')")
   public ProductResponse delete(String id){
+    System.out.println("yes 00");
     String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
     String sellerId = userClient.userId(email);
+    System.out.println("yes 1");
 
     Product product = productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTS));
+    System.out.println("yes 2");
 
     if(!product.getSellerId().equals(sellerId)){
       throw new AppException(ErrorCode.PRODUCT_SELLER_NOT_MATCH);
@@ -317,13 +380,17 @@ public class ProductService {
     Set<Variant> variants = product.getVariants();
 
     boolean isDelete = true;
+    System.out.println("yes 3");
 
-    for(Variant v: variants){
-      if(orderClient.existsByVariantId(v.getId())){
-        isDelete = false;
-        break;
-      }
-    }
+    // for(Variant v: variants){
+    //   if(orderClient.existsByVariantId(v.getId())){
+    //     isDelete = false;
+    //     break;
+    //   }
+    // }
+
+    System.out.println("yes 4");
+
 
     if(isDelete){
       productRepository.deleteById(id);
@@ -337,6 +404,29 @@ public class ProductService {
     return productMapper.toProductResponse(product);
   }
 
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  public void deleteByAdmin(){
+
+    List<Product> products = productRepository.findAll();
+
+    for(Product product : products){
+      Set<Variant> variants = product.getVariants();
+      boolean check = false;
+      for(Variant variant : variants){
+        if(variant.getId() == null){
+          check = true;
+        }
+      }
+
+      if(check){
+        productRepository.deleteById(product.getId());
+      }
+    }
+
+
+  }
+
+
 
   public boolean checkProductId(String id){
     return productRepository.existsById(id);
@@ -347,11 +437,6 @@ public class ProductService {
     return product.getSellerId().equals(sellerId);
   }
 
-
-  // elasticsearch - not done
-    // public List<Product> searchProductsByCriteria(String name, String query, String sellerid, Double minPrice, Double maxPrice) {
-  //   return productElasticsearchRepository.searchByCriteria(name, query, sellerid, minPrice, maxPrice);
-  // }
 
   public boolean doesVariantExist(String variantId) {
     return productRepository.existsByVariantId(variantId);
@@ -375,4 +460,168 @@ public class ProductService {
     return false;
   }
 
+  public List<String> getProductImageMetadata(String productId){
+
+    List<String> productImages = productRepository.getProductImagesById(productId);
+
+    return productImages;
+  }
+
+  public void saveProductImageMetadata(String productId, List<String> fileNames){
+    Product product = productRepository.findById(productId).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTS));
+    Set<String> fileNameSet = new HashSet<>(fileNames);
+    product.setProductImages(fileNameSet);
+    productRepository.save(product);
+  }
+
+  public List<FlashSaleProductResponse> getListProductByIds(List<String> ids){
+System.out.println("yes here...............");
+    List<Product> products = productRepository.findByIdIn(ids);
+
+    List<FlashSaleProductResponse> list = new ArrayList<>();
+System.out.println("abc");
+    for(Product product : products){
+System.out.println("def");
+
+      Set<Variant> setVariants = product.getVariants();
+      // Long minPrice = Long.MAX_VALUE;
+      // Long stock = 0L;
+      // for(Variant variant : variants){
+      //   if(variant.getPrice()< minPrice){
+      //     minPrice = variant.getPrice();
+      //   }
+      //   stock += variant.getStock();
+      // }
+
+      List<Variant> listVariants = new ArrayList<>(setVariants);
+
+      Variant variant = listVariants.get(0);
+
+      System.out.println("ghc");
+
+      String sellerId = product.getSellerId();
+      System.out.println("sellerid: " +sellerId);
+
+      String username = "";
+      try {
+        username = userClient.usernameByUserId(sellerId);
+        
+      } catch (Exception e) {
+        System.out.println(e.getMessage());
+      }
+
+
+      System.out.println("user client check : " + variant.getSalePrice());
+
+      FlashSaleProductResponse temp = FlashSaleProductResponse.builder()
+      .id(product.getId())
+      .images(product.getProductImages())
+      .productName(product.getProductName())
+      .slug(product.getSlug())
+      .price(variant.getPrice())
+      .salePrice(variant.getSalePrice())
+      .username(username)
+      .stock(variant.getStock())
+      .build();
+
+      list.add(temp);
+    }
+    System.out.println("here...............");
+    for(FlashSaleProductResponse x : list){
+      System.out.println(x.getProductName());
+    }
+
+    return list;
+  }
+
+
+  public List<ProductResponse> getRandomProducts(int limit){
+    return productMapper.toListProductResponse(productRepository.getRandomProducts(limit)) ;
+  }
+
+  public Page<ProductResponse> getProductByPeterCategory(String peterCategoryId, int page, int size){
+    Page<Product> list = productRepository.findByPeterCategory(peterCategoryId, PageRequest.of(page, size));
+    return list.map(product -> modelMapper.map(product, ProductResponse.class));
+  }
+
+  public ProductResponse findProductByVariantId(String variantId) {
+    Product product = productRepository.findByVariants_Id(variantId).orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_EXISTS));
+
+    return productMapper.toProductResponse(product);
+  }
+
+  public CartProductResponse cartProductResponse(String variantId){
+    System.out.println("ser vice goit");
+    Product product = productRepository.findByVariants_Id(variantId).orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_EXISTS));
+    
+    String variantName = "";
+    Long price = 0L;
+    Long saleSprice = 0L;
+
+    Set<Variant> variants = product.getVariants();
+    for(Variant variant : variants){
+      if(variant.getId().equals(variantId)){
+        variantName = variant.getVariantName();
+        price = variant.getPrice();
+        saleSprice = variant.getSalePrice();
+        break;
+      }
+    }
+
+    Set<String> images = product.getProductImages();
+    String image = "";
+    for(String i : images){
+      image = i;
+      break;
+    }
+
+    return CartProductResponse.builder()
+    .productId(product.getId())
+    .productName(product.getProductName())
+    .variantId(variantId)
+    .variantName(variantName)
+    .price(price)
+    .salePrice(saleSprice)
+    .slug(product.getSlug())
+    .image(image)
+    .build();
+  }
+
+
+  public void updateAllProductsWithDefaultAvailable() {
+    List<Product> allProducts = productRepository.findAll();
+
+    for (Product product : allProducts) {
+      if (product.getSold() == null) {
+        // product.setShippingId("683b529e2a9cfc41ae6f134b");
+        // Map<Integer, Long> maps = new HashMap<>();
+        // // maps.put(5,1L);
+
+        // product.setRating(maps);
+        product.setSold(0L);
+        productRepository.save(product);
+      }
+    }
+  }
+
+
+  public Page<ProductResponse> searchByProductName(String productName, int page, int size){
+    // System.out.println("product name: " + productName);
+    // Page<Product> list = productRepository.findByProductName(productName, PageRequest.of(page, size));
+    // return list.map(product -> modelMapper.map(product, ProductResponse.class));
+
+    String normalizedProductName = Normalizer.normalize(productName, Normalizer.Form.NFC);
+    System.out.println("Normalized product name: " + normalizedProductName);
+    Page<Product> list = productRepository.findByProductName(normalizedProductName, PageRequest.of(page, size));
+    return list.map(product -> modelMapper.map(product, ProductResponse.class));
+  }
+
+  @PreAuthorize("hasAnyRole('ROLE_SHIPPER','ROLE_STAFF','ROLE_ADMIN')")
+  public ProductResponse updateSoldById(String id, Long sold){
+    Product product = productRepository.findById(id).orElseThrow(()-> new AppException(ErrorCode.PRODUCTID_INVALID));
+
+    product.setSold(product.getSold() + sold);
+
+    return productMapper.toProductResponse(productRepository.save(product));
+  }
 }

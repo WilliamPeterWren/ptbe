@@ -26,6 +26,8 @@ public class SecurityConfig {
 
   private final String[] PUBLIC_ENDPOINTS_POST = {
     // "/api/users/register", 
+    "/api/products/set/product/images/id/{id}",
+    "/api/products/get/products/by/ids",
 
   };
 
@@ -38,7 +40,20 @@ public class SecurityConfig {
     "/api/categories/get-by-sellerid/{sellerId}",
 
     "/api/products/product-by-seller/{productId}/{sellerId}",
-    "/api/products/get-products/seller/{sellerId}"
+
+    "/api/products/get-products/seller/{sellerId}",
+    "/api/products/get/product/images/id/{id}",
+    "/api/products/get/products/by/ids",
+    "/api/products/get/product/rand/limit/{limit}",
+    "/api/products/get/product/peter/{peterCategoryId}",
+    "/api/products/get/product/variant/id/{id}",
+    "/api/products/get/cartproduct/variant/id/{id}",
+    
+    "/api/products/check/product/{productId}/seller/{sellerId}",
+    "/api/products/check/variant/id/{id}",
+    "/api/products/check/**",
+    "/api/products/search/product/productname/{productname}"
+
   };
 
   // private String signerKey = "WjG25z4tA+dZX3clK+u0/kRg1tCdV6vvaizOfsJLgy4HFasdkfwxKso+KlGArOm4uOdkai";
@@ -53,6 +68,7 @@ public class SecurityConfig {
             // .requestMatchers(HttpMethod.GET, "/api/users/get-all").hasRole(Role.ADMIN.name()) // no need
               .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS_GET).permitAll()
             .anyRequest().authenticated() 
+            // .anyRequest().permitAll()
     ); 
 
     // httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()))); 

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,6 +32,6 @@ public class Cart {
   String userId;
 
   @Indexed(unique = true)
-  Set<Seller> sellers;
-
+  @Builder.Default
+  Set<Seller> sellers = new HashSet<>();
 }

@@ -22,6 +22,7 @@ import com.tranxuanphong.peterservice.dto.request.FlashSaleCreateRequest;
 import com.tranxuanphong.peterservice.dto.request.FlashSaleSellerUpdateRequest;
 import com.tranxuanphong.peterservice.dto.request.FlashSaleUpdateRequest;
 import com.tranxuanphong.peterservice.dto.response.ApiResponse;
+import com.tranxuanphong.peterservice.dto.response.FlashSaleItemsResponse;
 import com.tranxuanphong.peterservice.dto.response.FlashSaleResponse;
 import com.tranxuanphong.peterservice.service.FlashSaleService;
 
@@ -87,4 +88,20 @@ public class FlashSaleController {
     .result(flashSaleService.delete(id))
     .build();
   }
+
+  @GetMapping("/get/items/{id}")
+  public ApiResponse<List<FlashSaleItemsResponse>> flashSaleItemsResponse(@PathVariable String id) {
+    return ApiResponse.<List<FlashSaleItemsResponse>>builder()
+    .result(flashSaleService.flashSaleItemsResponse(id))
+    .build();
+  }
+  
+  @GetMapping("/get/items/page/{id}")
+  public ApiResponse<List<FlashSaleItemsResponse>> flashSaleItemsResponsePage(@PathVariable String id) {
+    return ApiResponse.<List<FlashSaleItemsResponse>>builder()
+    .result(flashSaleService.flashSaleItemsResponsePage(id))
+    .build();
+  }
+
+   
 }

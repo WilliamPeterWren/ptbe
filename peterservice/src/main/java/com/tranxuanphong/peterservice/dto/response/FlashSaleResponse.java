@@ -1,6 +1,10 @@
 package com.tranxuanphong.peterservice.dto.response;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
+
+import com.tranxuanphong.peterservice.entity.FlashSaleItem;
 
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +13,10 @@ import lombok.Data;
 @Data
 public class FlashSaleResponse {
   String id;
-  String productId;
-  Long price;
+  String name;
+  String slug;
+
+  Set<FlashSaleItem> flashSaleItems;
+  Instant startedAt;
   Instant expiredAt;
 }

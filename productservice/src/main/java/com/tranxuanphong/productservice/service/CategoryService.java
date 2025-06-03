@@ -42,9 +42,14 @@ public class CategoryService {
 
   @PreAuthorize("hasRole('ROLE_SELLER')")
   public CategoryResponse create(CategoryCreateRequest request){
-
     String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
+    if(request.getCategoryName() == null || request.getCategoryName().isEmpty()){
+      throw new AppException(ErrorCode.CATEGORYID_INVALID);
+    }
+    
     String sellerId = userClient.userId(email);
+
+
     List<Category> categories = categoryRepository.findBySellerId(sellerId);
     for(Category c: categories){
       if(c.getCategoryName().equals(request.getCategoryName())){

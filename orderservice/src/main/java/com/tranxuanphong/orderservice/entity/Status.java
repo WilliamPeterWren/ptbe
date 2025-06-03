@@ -2,7 +2,6 @@ package com.tranxuanphong.orderservice.entity;
 
 import java.time.Instant;
 
-import org.springframework.data.annotation.Id;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -20,12 +19,11 @@ import com.tranxuanphong.orderservice.enums.OrderStatus;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Status {
 
-  @Id
-  String id;
-
   @Builder.Default
   OrderStatus status = OrderStatus.PENDING;
 
   @Builder.Default
   Instant createdAt = Instant.now();
+
+  String shipperId;
 }

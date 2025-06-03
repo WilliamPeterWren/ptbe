@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Setter
 @Getter
@@ -24,6 +25,8 @@ public class Variant {
 
     Long price;
 
+    Long salePrice;
+
     Long stock;
 
     @Builder.Default
@@ -31,4 +34,36 @@ public class Variant {
 
     @Builder.Default
     LocalDate updatedAt = LocalDate.now();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Variant other = (Variant) o;
+
+        return Objects.equals(this.id, other.id) &&
+               Objects.equals(this.variantName, other.variantName) &&
+               Objects.equals(this.price, other.price) &&
+               Objects.equals(this.salePrice, other.salePrice) &&
+               Objects.equals(this.stock, other.stock);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, variantName, price, stock);
+    }
+
+    @Override
+    public String toString() {
+        return "Variant{" +
+               "id='" + id + '\'' +
+               ", variantName='" + variantName + '\'' +
+               ", price=" + price +
+               ", stock=" + stock +
+               ", createdAt=" + createdAt +
+               ", updatedAt=" + updatedAt +
+               '}';
+    }
 }

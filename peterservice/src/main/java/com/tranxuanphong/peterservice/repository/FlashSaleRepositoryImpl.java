@@ -45,5 +45,21 @@ public class FlashSaleRepositoryImpl implements FlashSaleRepositoryCustom {
         return mongoTemplate.find(query, FlashSale.class);
     }
 
+    @Override
+    public FlashSaleItem findFlashSaleItemByProductId(String productId) {
+        Query query = new Query(Criteria.where("flashSaleItems.productId").is(productId));
+        FlashSale flashSale = mongoTemplate.findOne(query, FlashSale.class);
+
+        if (flashSale != null) {
+            return flashSale.getFlashSaleItems()
+                            .stream()
+                            .filter(item -> productId.equals(item.getProductId()))
+                            .findFirst()
+                            .orElse(null);
+        }
+
+        return null;
+    }
+
 }
 

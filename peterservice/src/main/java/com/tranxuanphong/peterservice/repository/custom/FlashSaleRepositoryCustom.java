@@ -8,6 +8,6 @@ import com.tranxuanphong.peterservice.entity.FlashSaleItem;
 public interface FlashSaleRepositoryCustom {
   List<FlashSaleItem> getFlashSaleItems(String flashSaleId, int page, int size);
   List<FlashSale> getActiveFlashSales();
-
+  FlashSaleItem findFlashSaleItemByProductId(String productId);
 }
 

@@ -5,6 +5,7 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017/cartservice
       database: cartservice
+      
 server:
   port: 8083
 eureka:
@@ -22,3 +23,6 @@ eureka:
 jwt:
   signerKey: "WjG25z4tA+dZX3clK+u0/kRg1tCdV6vvaizOfsJLgy4HFasdkfwxKso+KlGArOm4uOdkai"
   valid-duration: 36000
+
+frontend:
+  port: 3000

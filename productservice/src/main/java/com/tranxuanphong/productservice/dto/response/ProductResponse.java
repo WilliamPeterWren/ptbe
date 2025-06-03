@@ -2,6 +2,7 @@ package com.tranxuanphong.productservice.dto.response;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Set;
 
 import com.tranxuanphong.productservice.entity.Info;
@@ -32,6 +33,12 @@ public class ProductResponse {
   String slug;
 
   String description;
+
+  Map<Integer, Long> rating;
+  
+  Long sold;
+
+  String shippingId;
 
   Instant createdAt;
 

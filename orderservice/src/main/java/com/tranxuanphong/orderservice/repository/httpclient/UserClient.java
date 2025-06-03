@@ -10,10 +10,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @FeignClient(name = "userservice")
 public interface UserClient {
-  @GetMapping(value = "/api/users/check-id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/api/users/check/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   boolean existsId(@PathVariable String id);
   
-  @GetMapping(value = "/api/users/get-userid/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/api/users/get/userid/email/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
   String userId(@PathVariable String email);
+
+  @GetMapping(value = "/api/users/get/username/email/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
+  String usernameByEmail(@PathVariable String email);
+
+  @GetMapping(value = "/api/users/get/username/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  String usernameByUserId(@PathVariable String id);
 
 }

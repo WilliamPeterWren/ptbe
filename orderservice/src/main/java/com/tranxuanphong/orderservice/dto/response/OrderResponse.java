@@ -1,5 +1,6 @@
 package com.tranxuanphong.orderservice.dto.response;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -19,10 +20,12 @@ public class OrderResponse {
   String userId;
   String sellerId;
   Set<OrderItem> orderItems;
-  Long shippingVoucherId;
+  String shippingId;
+  String shippingVoucherId;
+  String sellerVoucherId;
   String addressId;
   Set<Status> orderStatus;
   PaymentType paymentType;
-  LocalDate createdAt;
-  LocalDate updatedAt;
+  Instant createdAt;
+  Instant updatedAt;
 }

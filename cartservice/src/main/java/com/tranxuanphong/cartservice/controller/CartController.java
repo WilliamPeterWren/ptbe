@@ -3,6 +3,7 @@ package com.tranxuanphong.cartservice.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tranxuanphong.cartservice.dto.model.SellerResponse;
 import com.tranxuanphong.cartservice.dto.request.AddToCartRequest;
 import com.tranxuanphong.cartservice.dto.request.CartUpdateRequest;
 import com.tranxuanphong.cartservice.dto.response.ApiResponse;
@@ -14,6 +15,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.Set;
+
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -24,6 +29,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 @RequestMapping("/api/carts")
+// @CrossOrigin(origins = "*")
 public class CartController {
   CartService cartService;
 
@@ -36,15 +42,16 @@ public class CartController {
   }
 
   @GetMapping
-  public ApiResponse<CartResponse> getCart() {
-    return ApiResponse.<CartResponse>builder()
+  public ApiResponse<Set<SellerResponse>> getCart() {
+    return ApiResponse.<Set<SellerResponse>>builder()
     .result(cartService.getCart())
     .build();
   }
 
-  @PostMapping("/addtocart")
-  public ApiResponse<CartResponse> addToCart(@RequestBody AddToCartRequest request) {
-    return ApiResponse.<CartResponse>builder()
+
+  @PostMapping("/addtocartt")
+  public ApiResponse<Set<SellerResponse>> addToCart(@RequestBody AddToCartRequest request) {
+    return ApiResponse.<Set<SellerResponse>>builder()
       .result(cartService.addToCart(request))
       .build();
   }
@@ -56,10 +63,10 @@ public class CartController {
     .build();
   }
 
-  @DeleteMapping("/caritem/id/{cartItemId}")
-  public ApiResponse<CartResponse> deleteCartItem(@PathVariable String cartItemId) {
+  @DeleteMapping("/cartitem/id/{variantId}")
+  public ApiResponse<CartResponse> deleteItem(@PathVariable String variantId) {
     return ApiResponse.<CartResponse>builder()
-    .result(cartService.deleteCartItem(cartItemId))
+    .result(cartService.deleteItem(variantId))
     .build();
   }
 
@@ -67,6 +74,21 @@ public class CartController {
   public ApiResponse<CartResponse> deleteSeller(@PathVariable String sellerId) {
     return ApiResponse.<CartResponse>builder()
     .result(cartService.deleteSeller(sellerId))
+    .build();
+  }
+
+  @DeleteMapping("/cartitem/variantid/{variantId}")
+  public ApiResponse<Set<SellerResponse>> deleteItemResponse(@PathVariable String variantId) {
+    // System.out.println("dellllll");
+    return ApiResponse.<Set<SellerResponse>>builder()
+    .result(cartService.deletee(variantId))
+    .build();
+  }
+
+  @DeleteMapping("/seller/sellerId/{sellerId}")
+  public ApiResponse<Set<SellerResponse>> deleteSellerById(@PathVariable String sellerId) {
+    return ApiResponse.<Set<SellerResponse>>builder()
+    .result(cartService.deleteSellerById(sellerId))
     .build();
   }
 

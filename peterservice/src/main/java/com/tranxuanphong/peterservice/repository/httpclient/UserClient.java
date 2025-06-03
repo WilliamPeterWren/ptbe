@@ -15,7 +15,7 @@ public interface UserClient {
   @GetMapping(value = "/api/users/check/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   boolean existsId(@PathVariable String id); 
 
-  @GetMapping(value = "/api/users/get/userid/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/api/users/get/userid/email/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
   String userId(@PathVariable String email);
 
 

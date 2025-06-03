@@ -26,4 +26,18 @@ public class FileController {
             return ResponseEntity.status(500).body(List.of("Failed to upload files: " + e.getMessage()));
         }
     }
+
+    @PostMapping("/update/{productId}")
+    public ResponseEntity<List<String>> updateProductImages(
+            @PathVariable String productId,
+            @RequestParam("files") List<MultipartFile> files) {
+        try {
+            List<String> fileNames = fileService.updateProductImages(productId, files);
+            return ResponseEntity.ok(fileNames);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(List.of(e.getMessage()));
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body(List.of("Failed to update files: " + e.getMessage()));
+        }
+    }
 }

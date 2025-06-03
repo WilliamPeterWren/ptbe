@@ -1,28 +1,25 @@
-package com.tranxuanphong.cartservice.entity;
+package com.tranxuanphong.orderservice.model;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-
-
-import org.springframework.data.annotation.Id;
-
-@Setter
-@Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Builder
-public class CartItem {
-  @Id
-  String id;
-
+public class ItemResponse {
+  Long salePrice;
+  Long discount;
+  Long price;
   String variantId;
+  String variantName;
+  String productId;
+  String productName;
   Long quantity;
-
+  String image;
 }

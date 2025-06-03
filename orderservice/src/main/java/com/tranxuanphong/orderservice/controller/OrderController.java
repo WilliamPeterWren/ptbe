@@ -7,6 +7,8 @@ import com.tranxuanphong.orderservice.dto.request.OrderCreateRequest;
 import com.tranxuanphong.orderservice.dto.request.OrderUpdateRequest;
 import com.tranxuanphong.orderservice.dto.response.ApiResponse;
 import com.tranxuanphong.orderservice.dto.response.OrderResponse;
+import com.tranxuanphong.orderservice.dto.response.OrderResponseFE;
+import com.tranxuanphong.orderservice.enums.OrderStatus;
 import com.tranxuanphong.orderservice.service.OrderService;
 
 import lombok.AccessLevel;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -49,32 +52,23 @@ public class OrderController {
       .build();
   }
 
+  @GetMapping("/user/getall")
+  public Page<OrderResponseFE> getAllOrderByUser(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    return orderService.getAllOrderByUser(page, size);
+  }
 
-  // @GetMapping("/get-all")
-  // public ApiResponse<List<OrderResponse>> getAll() {
-  //   return ApiResponse.<List<OrderResponse>>builder()
-  //   .result(orderService.getAll())
-  //   .build();
+  // @GetMapping("/user/orderstatus")
+  // public Page<OrderResponseFE> getOrderByStatus(@RequestBody OrderStatus orderstatus, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+  //   System.out.println("controller");
+  //   return orderService.getOrderByStatus(orderstatus, page, size);
   // }
 
-  // @GetMapping("/get-by-sellerid/{sellerId}")
-  // public ApiResponse<List<OrderResponse>> getBySellerID(@PathVariable String sellerId) {
-  //   return ApiResponse.<List<OrderResponse>>builder()
-  //   .result(orderService.getBySellerID(sellerId))
-  //   .build();
-  // }
+  @GetMapping("/user/orderstatus/{orderstatus}")
+  public Page<OrderResponseFE> getOrderByStatus(@PathVariable OrderStatus orderstatus, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    System.out.println("controller");
+    return orderService.getOrderByStatus(orderstatus, page, size);
+  }
 
-  // @GetMapping("/{slug}")
-  // public ApiResponse<OrderResponse> getOne(@PathVariable String slug) {
-  //   return ApiResponse.<OrderResponse>builder()
-  //   .result(orderService.getOne(slug))
-  //   .build();
-  // }
 
-  // @PutMapping("/{slug}")
-  // public ApiResponse<OrderResponse> upadte(@PathVariable String slug, @RequestBody UpdateOrderRequest request) {
-  //   return ApiResponse.<OrderResponse>builder()
-  //   .result(orderService.update(slug, request))
-  //   .build();
-  // }
+  
 }

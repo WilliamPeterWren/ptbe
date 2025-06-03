@@ -12,5 +12,7 @@ public enum OrderStatus {
     DISPATCHED,
     DELIVERING,
     DELIVERD,
+    RETURN,
+    REFUND,
     CANCELLED
 }

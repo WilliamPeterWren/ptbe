@@ -35,9 +35,11 @@ public class SecurityConfig {
   private final String[] PUBLIC_ENDPOINTS_GET = {
     "/api/users/check/id/{id}",
     "/api/users/check/email/{email}",
-    "/api/users/get/userid/email/{email}",
+    "/api/users/get/userid/email/{email}",    
+    "/api/users/get/username/email/{email}",
+    "/api/users/get/username/id/{id}"
 
-    "/api/addresses/**",
+    // "/api/addresses/**",
   };
 
   // private String signerKey = "WjG25z4tA+dZX3clK+u0/kRg1tCdV6vvaizOfsJLgy4HFasdkfwxKso+KlGArOm4uOdkai";
@@ -49,7 +51,6 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception { 
     httpSecurity.authorizeHttpRequests(
       requests -> requests.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS_POST).permitAll()
-            // .requestMatchers(HttpMethod.GET, "/api/users/get-all").hasRole(Role.ADMIN.name()) // no need
               .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS_GET).permitAll()
             .anyRequest().authenticated() 
     ); 

@@ -7,21 +7,23 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tranxuanphong.productservice.dto.request.ProductCreateRequest;
 import com.tranxuanphong.productservice.dto.request.ProductUpdateRequest;
 import com.tranxuanphong.productservice.dto.response.ApiResponse;
+import com.tranxuanphong.productservice.dto.response.CartProductResponse;
+import com.tranxuanphong.productservice.dto.response.FlashSaleProductResponse;
 import com.tranxuanphong.productservice.dto.response.ProductResponse;
 import com.tranxuanphong.productservice.entity.Product;
 import com.tranxuanphong.productservice.service.ProductService;
 
-import jakarta.ws.rs.Path;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,7 +44,6 @@ public class ProductController {
       .result(productService.create(request))
       .build();
   }
-
 
   @GetMapping("/get-products")
   public ApiResponse<Page<ProductResponse>> getProducts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
@@ -74,21 +75,10 @@ public class ProductController {
   
   @DeleteMapping("/{id}")
   public ApiResponse<ProductResponse> delete(@PathVariable String id){
-
     return ApiResponse.<ProductResponse>builder()
     .result(productService.delete(id))
     .build();
   }
-
-  // @GetMapping("/search")
-  // public ResponseEntity<Iterable<Product>> searchProducts(
-  //       @RequestParam(required = false) String name,
-  //       @RequestParam(required = false) String query,
-  //       @RequestParam(required = false) String sellerId,
-  //       @RequestParam(required = false) Double minPrice,
-  //       @RequestParam(required = false) Double maxPrice) {
-  //   return ResponseEntity.ok(productService.searchProductsByCriteria(name, query, sellerId, minPrice, maxPrice));
-  // }
 
   @GetMapping("/check/product/id/{id}")
   public boolean checkProductId(@PathVariable String id) {
@@ -117,6 +107,80 @@ public class ProductController {
     return productService.doesVariantExistBySellerId(variantId, sellerId);
   }
 
+  @GetMapping("/get/product/images/id/{id}")
+  public List<String> getProductImageMetadata(@PathVariable String id) {
+    return productService.getProductImageMetadata(id);
+  }
+
+  @PostMapping("/set/product/images/id/{id}")
+  public void setProductImageMetadata(@PathVariable String id, @RequestBody List<String> fileNames) {
+    productService.saveProductImageMetadata(id, fileNames);
+  }
+  
+  @PostMapping("/get/products/by/ids")
+  public List<FlashSaleProductResponse> getProductImageMetadata(@RequestBody List<String> ids) {
+    System.out.println("yes contr");
+    return productService.getListProductByIds(ids);
+  }
+
+  @GetMapping("/get/product/rand/limit/{limit}")
+  public List<ProductResponse> getRandomProducts(@PathVariable int limit) {
+    return productService.getRandomProducts(limit);
+  }
+
+  @GetMapping("/get/product/peter/{peterCategoryId}")
+  public Page<ProductResponse> getRandomProducts(@PathVariable String peterCategoryId, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    return productService.getProductByPeterCategory(peterCategoryId, page, size);
+  }
+
+
+  @GetMapping("/get/product/variant/id/{id}")
+  public ProductResponse findProductByVariantId(@PathVariable String id) {
+    
+    return productService.findProductByVariantId(id);
+  }
+
+  @GetMapping("/get/cartproduct/variant/id/{id}")
+  public CartProductResponse getCartProductResponse(@PathVariable String id) {
+    System.out.println("id ..........." + id);
+    return productService.cartProductResponse(id);
+  }
+
+  @DeleteMapping("/delete/admin/product")
+  public void deleteByAdmin(){
+    productService.deleteByAdmin();
+  }
   
 
+  // @PostMapping("/update/all/shipping")
+  // public void postMethodName(@RequestBody String entity) {
+  //   productService.updateAllProductsWithDefaultAvailable();
+  // }
+
+  // @PostMapping("/update/all/rating")
+  // public void postMethodName() {
+  //   productService.updateAllProductsWithDefaultAvailable();
+  // }
+
+  @GetMapping("/search/product/productname/{productname}")
+  public Page<ProductResponse> searchProductByProductName(@PathVariable String productname,
+                                                           @RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(defaultValue = "10") int size) {
+        String decodedProductName = URLDecoder.decode(productname, StandardCharsets.UTF_8);
+        return productService.searchByProductName(decodedProductName, page, size);
+    }
+
+
+  @PutMapping("/id/{id}/sold/{sold}")
+  public ApiResponse<ProductResponse> updateSoldById(@PathVariable String id, @PathVariable Long sold) {
+    return ApiResponse.<ProductResponse>builder()
+    .result(productService.updateSoldById(id, sold))
+    .build();
+  }
 }
+
+
+  
+  
+
+

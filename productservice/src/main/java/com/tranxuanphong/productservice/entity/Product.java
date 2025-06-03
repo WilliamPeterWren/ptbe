@@ -2,7 +2,10 @@ package com.tranxuanphong.productservice.entity;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.data.annotation.Id;
@@ -49,6 +52,9 @@ public class Product {
     String peterCategory;
 
     @Builder.Default
+    String shippingId = "683b529e2a9cfc41ae6f134b"; 
+
+    @Builder.Default
     // @Field(type = FieldType.Nested)
     Set<String> productImages = new HashSet<>();
 
@@ -64,6 +70,12 @@ public class Product {
 
     // @Field(type = FieldType.Text)
     String description;
+
+    @Builder.Default
+    Map<Integer, Long> rating = new HashMap<>();
+
+    @Builder.Default
+    Long sold = 0L;
 
     @Builder.Default
     boolean isActive = true;

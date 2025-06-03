@@ -1,7 +1,11 @@
 package com.tranxuanphong.peterservice.service;
 
 import java.time.Instant;
+import java.util.ArrayList;
+// import java.util.Collections;
+// import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import org.springframework.data.domain.Page;
@@ -18,6 +22,8 @@ import org.springframework.stereotype.Service;
 import com.tranxuanphong.peterservice.dto.request.FlashSaleCreateRequest;
 import com.tranxuanphong.peterservice.dto.request.FlashSaleSellerUpdateRequest;
 import com.tranxuanphong.peterservice.dto.request.FlashSaleUpdateRequest;
+import com.tranxuanphong.peterservice.dto.response.FlashSaleItemsResponse;
+import com.tranxuanphong.peterservice.dto.response.FlashSaleProductResponse;
 import com.tranxuanphong.peterservice.dto.response.FlashSaleResponse;
 import com.tranxuanphong.peterservice.entity.FlashSale;
 import com.tranxuanphong.peterservice.entity.FlashSaleItem;
@@ -102,22 +108,25 @@ public class FlashSaleService {
   public FlashSaleResponse updateBySeller(String id, FlashSaleSellerUpdateRequest request){
     String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
     String sellerId = userClient.userId(email);
-
-    Set<FlashSaleItem> items = request.getFlashSaleItems();
-
-    for(FlashSaleItem item : items){
-      if(!productClient.doesProductExistBySellerId(item.getProductId(), sellerId)){
-        throw new AppException(ErrorCode.PRODUCT_NOT_EXISTS);
-      }
+    if(!productClient.doesProductExistBySellerId(request.getProductId(), sellerId)){
+      throw new AppException(ErrorCode.PRODUCT_NOT_EXISTS);
     }
-
     FlashSale flashSale = flashSaleRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.FLASHSALE_NOT_FOUND));
-    
+    System.out.println("yes 00");
     if(flashSale.getExpiredAt().isBefore(Instant.now())){
       throw new AppException(ErrorCode.UNAUTHENTICATED);
     }
 
+    FlashSaleItem item = FlashSaleItem.builder()
+    .productId(request.getProductId())
+    .price(request.getPrice())
+    .build();
+    
+    Set<FlashSaleItem> items = flashSale.getFlashSaleItems();
+    items.add(item);
+
     flashSale.setFlashSaleItems(items);
+
     return flashSaleMapper.toFlashSaleResponse(flashSaleRepository.save(flashSale));
   }
 
@@ -135,5 +144,137 @@ public class FlashSaleService {
     return listFlashSaleItems(flashSaleId, 0, 10);
   }
 
+  public List<FlashSaleItemsResponse> flashSaleItemsResponse(String flashSaleId){
+    System.out.println("yes 00");
+    FlashSale flashSale = flashSaleRepository.findById(flashSaleId).orElseThrow(() -> new AppException(ErrorCode.FLASHSALE_NOT_FOUND));
+    
+    Set<FlashSaleItem> items = flashSale.getFlashSaleItems();
+
+    System.out.println("size: "+items.size());
+
+    List<String> ids = new ArrayList<>();
+    
+    List<FlashSaleItem> listRand = new ArrayList<>(items);
+    
+    for(int i = 0; i < 10; i++){
+      
+      Random random = new Random();
+      FlashSaleItem randomItem = listRand.get(random.nextInt(listRand.size()));
+
+      if(!ids.contains(randomItem.getProductId())) {
+        ids.add(randomItem.getProductId());
+      }
+      else{
+        i--;
+      }
+
+    }
+
+   
+    System.out.println("yes 02");
+    
+    List<FlashSaleProductResponse> list = productClient.getListProductByIds(ids);
+    System.out.println("yes 03");
+
+
+    List<FlashSaleItemsResponse> listFlashSaleItemsResponses = new ArrayList<>();
+    System.out.println("yes 04");
+
+
+    for(FlashSaleProductResponse p : list){
+      System.out.println("yes 05");
+
+      FlashSaleItem flashSaleItem = getFlashSaleItemByProductId(p.getId());
+      System.out.println("yes 06");
+
+      FlashSaleItemsResponse flashSaleItemsResponse = FlashSaleItemsResponse.builder()
+      .id(p.getId())
+      .images(p.getImages())
+      .productName(p.getProductName())
+      .slug(p.getSlug())
+      .price(p.getPrice())
+    
+      .discount(flashSaleItem.getPrice())
+      .username(p.getUsername())
+      .stock(p.getStock())
+      .build();
+      listFlashSaleItemsResponses.add(flashSaleItemsResponse);
+    }
+    System.out.println("yes 07");
+
+    return listFlashSaleItemsResponses;
+  }
+
+  public FlashSaleItem getFlashSaleItemByProductId(String productId) {
+    return flashSaleRepository.findFlashSaleItemByProductId(productId);
+  }
+
+  public List<FlashSaleItemsResponse> flashSaleItemsResponsePage(String flashSaleId){
+    System.out.println("yes 00");
+    FlashSale flashSale = flashSaleRepository.findById(flashSaleId).orElseThrow(() -> new AppException(ErrorCode.FLASHSALE_NOT_FOUND));
+    
+    Set<FlashSaleItem> items = flashSale.getFlashSaleItems();
+
+    System.out.println("size: "+items.size());
+
+    List<String> productIds = new ArrayList<>();
+    
+    List<FlashSaleItem> listRand = new ArrayList<>(items);
+
+    // List<FlashSaleItem> sliced = listRand.subList(0, 48);
+
+    // Collections.shuffle(sliced);
+
+    // for(FlashSaleItem item : items){
+    //   ids.add(item.getProductId());
+    // }
+    
+    for(int i = 0;  i < listRand.size() && i < 48; i++){
+      
+      Random random = new Random();
+      FlashSaleItem randomItem = listRand.get(random.nextInt(listRand.size()));
+
+      if(!productIds.contains(randomItem.getProductId())) {
+        productIds.add(randomItem.getProductId());
+      }
+      else{
+        i--;
+      }
+
+    }
   
+    System.out.println("yes 02");
+    
+    List<FlashSaleProductResponse> list = productClient.getListProductByIds(productIds);
+    System.out.println("yes 03");
+
+
+    List<FlashSaleItemsResponse> listFlashSaleItemsResponses = new ArrayList<>();
+    System.out.println("yes 04");
+
+
+    for(FlashSaleProductResponse p : list){
+      System.out.println("yes 05");
+
+      FlashSaleItem flashSaleItem = getFlashSaleItemByProductId(p.getId());
+      System.out.println("yes 06");
+
+      FlashSaleItemsResponse flashSaleItemsResponse = FlashSaleItemsResponse.builder()
+      .id(p.getId())
+      .images(p.getImages())
+      .productName(p.getProductName())
+      .slug(p.getSlug())
+      .price(p.getPrice())
+      .salePrice(p.getSalePrice())
+      .discount(flashSaleItem.getPrice())
+      .username(p.getUsername())
+      .stock(p.getStock())
+      .build();
+      listFlashSaleItemsResponses.add(flashSaleItemsResponse);
+    }
+    System.out.println("yes 07");
+
+    return listFlashSaleItemsResponses;
+  }
+
 }

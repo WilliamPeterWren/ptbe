@@ -1,6 +1,6 @@
 package com.tranxuanphong.orderservice.entity;
 
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,7 +36,9 @@ public class Order {
   @Builder.Default
   Set<Status> orderStatus = new HashSet<>();
   
-  Long shippingVoucherId;
+  String shippingId; // gia cuoc van chuyen -> tao moi ben peterservice, shippingPrice entity
+
+  String shippingVoucherId;
 
   String sellerVoucherId;
 
@@ -45,8 +47,8 @@ public class Order {
   PaymentType paymentType;
 
   @Builder.Default
-  LocalDate createdAt = LocalDate.now();
+  Instant createdAt = Instant.now();
 
   @Builder.Default
-  LocalDate updatedAt = LocalDate.now();
+  Instant updatedAt = Instant.now();
 }

@@ -22,4 +22,7 @@ public class ProductUpdateRequest {
   Set<Variant> variants;
 
   Set<Info> infos;
+
+  String shippingId;
+
 }

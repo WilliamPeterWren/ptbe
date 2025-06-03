@@ -46,6 +46,7 @@ public enum ErrorCode {
   CUSTOMER_SELLER_CONFLIC(1013,"can't order your own product", HttpStatus.NOT_FOUND),
   ORDER_NOT_FOUND(1013,"order not found", HttpStatus.NOT_FOUND),
   ORDER_USER_NOT_FOUND(1013,"this user don't have this order", HttpStatus.NOT_FOUND),
+  ORDER_STATUS_INVALID(1013,"status already in this order", HttpStatus.NOT_FOUND),
   ; 
 
   int code; 

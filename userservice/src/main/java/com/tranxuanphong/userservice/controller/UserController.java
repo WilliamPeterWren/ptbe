@@ -95,6 +95,16 @@ public class UserController {
     return userService.getUserId(email);
   }
 
+  @GetMapping("/get/username/email/{email}")
+  public String getUsernameByEmail(@PathVariable String email){
+    return userService.getUsernameByEmail(email);
+  }
+
+  @GetMapping("/get/username/id/{id}")
+  public String getUsernameById(@PathVariable String id){
+    return userService.getUsernameById(id);
+  }
+
 
 
 }

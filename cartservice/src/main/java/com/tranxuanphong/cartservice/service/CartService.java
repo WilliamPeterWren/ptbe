@@ -1,5 +1,6 @@
 package com.tranxuanphong.cartservice.service;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -7,11 +8,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.tranxuanphong.cartservice.dto.model.ItemResponse;
+import com.tranxuanphong.cartservice.dto.model.SellerResponse;
 import com.tranxuanphong.cartservice.dto.request.AddToCartRequest;
 import com.tranxuanphong.cartservice.dto.request.CartUpdateRequest;
 import com.tranxuanphong.cartservice.dto.response.CartResponse;
 import com.tranxuanphong.cartservice.entity.Cart;
-import com.tranxuanphong.cartservice.entity.CartItem;
+import com.tranxuanphong.cartservice.entity.Item;
 import com.tranxuanphong.cartservice.entity.Seller;
 import com.tranxuanphong.cartservice.exception.AppException;
 import com.tranxuanphong.cartservice.exception.ErrorCode;
@@ -58,7 +61,7 @@ public class CartService {
   }
 
   @PreAuthorize("hasRole('ROLE_USER')")
-  public CartResponse getCart(){
+  public Set<SellerResponse> getCart(){
 
     String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
     if(!userClient.doesUserExistByEmail(email)){
@@ -69,84 +72,269 @@ public class CartService {
 
     Cart cart = cartRepository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
-    return CartResponse.builder()
-    .sellers(cart.getSellers())
-    .build();
+    Set<SellerResponse> cartSellers = new HashSet<>();
+    Set<Seller> sellers = cart.getSellers();
+
+    for(Seller seller : sellers){
+
+      String sellerId = seller.getSellerId();
+      String sellerUsername = userClient.username(sellerId);
+      
+      Set<ItemResponse> itemResponse = new HashSet<>();
+      Set<Item> cartItems = seller.getItems();
+
+      for(Item cartItem : cartItems){
+    
+        ItemResponse cartProduct = productClient.getProductByVariantId(cartItem.getVariantId());
+
+        cartProduct.setQuantity(cartItem.getQuantity());
+        cartProduct.setUpdatedAt(cartItem.getUpdatedAt());
+
+        itemResponse.add(cartProduct);
+      }
+
+
+      SellerResponse cartSeller = SellerResponse.builder()
+      .sellerId(sellerId)
+      .sellerUsername(sellerUsername)
+      .itemResponses(itemResponse)
+      .updatedAt(seller.getUpdatedAt())
+      .build();
+
+      cartSellers.add(cartSeller);
+    }
+
+
+    return cartSellers;
   }
 
   @PreAuthorize("hasRole('ROLE_USER')")
-  public CartResponse addToCart(AddToCartRequest request){
+  public Set<SellerResponse> addToCart(AddToCartRequest request){
     String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
     if(!userClient.doesUserExistByEmail(email)){
       throw new AppException(ErrorCode.UNAUTHENTICATED);
     }
 
-    if(request.getVariantId() != null && !productClient.doesVariantExistById(request.getVariantId())){
-      throw new AppException(ErrorCode.VARIANT_NOT_EXISTS);
-    }
+    // if(request.getVariantId() != null && !productClient.doesVariantExistById(request.getVariantId())){
+    //   throw new AppException(ErrorCode.VARIANT_NOT_EXISTS);
+    // }
 
     String userId = userClient.userId(email);
 
     Cart cart = cartRepository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
+    Set<SellerResponse> sellerResponses = new HashSet<>();
     Set<Seller> sellers = cart.getSellers();
+    
+    boolean sellerIdCheck = false;
+    boolean variantCheck = false;
 
-    for(Seller seller: sellers){
-      if(seller.getSellerId().equals(request.getSellerId())){
-        Set<CartItem> cartItems = seller.getCartItems();
+    for(Seller seller : sellers){
 
-        for(CartItem cartItem: cartItems){
-          if(cartItem.getVariantId().equals(request.getVariantId())){
-            cartItem.setQuantity(request.getQuantity());         
-            seller.setCartItems(cartItems);
+      String sellerId = seller.getSellerId();
+
+      if(sellerId.equals(request.getSellerId())){
+        sellerIdCheck = true;
+      }
+
+      String sellerUsername = userClient.username(sellerId);
+
+      Set<ItemResponse> itemResponses = new HashSet<>();
+      Set<Item> items = seller.getItems();
+
+
+      for(Item item : items){
+        if(item.getVariantId().equals(request.getVariantId())){
+          item.setQuantity(item.getQuantity() + request.getQuantity());    
+          item.setUpdatedAt(Instant.now());
+          seller.setUpdatedAt(Instant.now());
+          
+          seller.setItems(items);
+          cart.setSellers(sellers);
+          cartRepository.save(cart);
+
+          variantCheck = true;          
+        } 
+
+        
+        ItemResponse itemResponse = productClient.getProductByVariantId(item.getVariantId());
+        itemResponse.setQuantity(item.getQuantity());      
+        itemResponse.setUpdatedAt(item.getUpdatedAt());
+        itemResponses.add(itemResponse);
+
+      }
+
+
+      SellerResponse sellerResponse = SellerResponse.builder()
+        .sellerId(sellerId)
+        .sellerUsername(sellerUsername)
+        .itemResponses(itemResponses)
+        .updatedAt(seller.getUpdatedAt())
+        .build();
+
+        sellerResponses.add(sellerResponse);
+    }
+    
+
+
+    if(!variantCheck){
+      if(sellerIdCheck){
+
+        // data base
+        for(Seller seller : sellers){
+          if(seller.getSellerId().equals(request.getSellerId())){
+
+            // db
+            Set<Item> items = seller.getItems();
+
+            Item item = Item.builder()
+            .variantId(request.getVariantId())
+            .quantity(request.getQuantity())
+            .build();
+
+            items.add(item);
+            seller.setItems(items);
             cart.setSellers(sellers);
-            return CartResponse.builder()
-              .sellers(sellers)
-              .build();
+
+            cartRepository.save(cart);
+        
+          }
+        } 
+
+        // response
+        for(SellerResponse sellerResponse : sellerResponses){
+          if(sellerResponse.getSellerId().equals(request.getSellerId())){
+            Set<ItemResponse> itemResponses = sellerResponse.getItemResponses();
+
+            ItemResponse itemResponse = productClient.getProductByVariantId(request.getVariantId());
+            itemResponse.setQuantity(request.getQuantity());      
+            itemResponse.setUpdatedAt(Instant.now());
+            itemResponses.add(itemResponse);
+
+            sellerResponse.setItemResponses(itemResponses);
+
+            return sellerResponses;
+
           }
         }
-   
-        CartItem cartItem = CartItem.builder()
-        .quantity(request.getQuantity())
+      
+      } else {
+
+        Set<Item> items = new HashSet<>();
+        
+        Item item = Item.builder()
         .variantId(request.getVariantId())
+        .quantity(request.getQuantity())
         .build();
-      
-        cartItems.add(cartItem);
-        seller.setCartItems(cartItems);       
-        
+
+        items.add(item);
+
+        Seller seller = Seller.builder()
+        .sellerId(request.getSellerId())
+        .items(items)
+        .build();
+
+        sellers.add(seller);
         cart.setSellers(sellers);
+
         cartRepository.save(cart);
+
         
-        return CartResponse.builder()
-        .sellers(sellers)
+        // response
+        String sellerUsername = userClient.username(request.getSellerId());
+        
+        Set<ItemResponse> itemResponses = new HashSet<>();
+
+        ItemResponse itemResponseApi = productClient.getProductByVariantId(request.getVariantId());
+        itemResponseApi.setQuantity(request.getQuantity());
+        itemResponseApi.setUpdatedAt(Instant.now());
+        itemResponses.add(itemResponseApi);
+  
+
+        SellerResponse sellerResponse = SellerResponse.builder()
+        .sellerId(request.getSellerId())
+        .sellerUsername(sellerUsername)
+        .itemResponses(itemResponses)
+        .updatedAt(Instant.now())
         .build();
+
+        sellerResponses.add(sellerResponse);
+        return sellerResponses;
+        
       }
-      
+     
+    
     }
 
-    CartItem cartItem = CartItem.builder()
-      .quantity(request.getQuantity())
-      .variantId(request.getVariantId())
-      .build();
 
-    Set<CartItem> cartItems = new HashSet<>();
-    cartItems.add(cartItem);
-
-    Seller seller = Seller.builder()
-    .sellerId(request.getSellerId())
-    .cartItems(cartItems)
-    .build();
-
-    sellers.add(seller);
-        
-    cart.setSellers(sellers);
-    cartRepository.save(cart);
-    
-    return CartResponse.builder()
-    .sellers(sellers)
-    .build();
+    return sellerResponses;
   }
   
+  @PreAuthorize("hasRole('ROLE_USER')")
+  public Set<SellerResponse> deletee(String variantId){
+    String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
+    if(!userClient.doesUserExistByEmail(email)){
+      throw new AppException(ErrorCode.UNAUTHENTICATED);
+    }
+
+    String sellerId = userClient.userId(email);
+
+    Cart cart = cartRepository.findByUserId(sellerId).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+   
+    Set<SellerResponse> sellerResponses = new HashSet<>();
+    Set<Seller> sellers = cart.getSellers();
+   
+    for(Seller seller : sellers){
+      String sellerUsername = userClient.username(sellerId);
+      Set<Item> items = seller.getItems();
+      Set<ItemResponse> itemResponses = new HashSet<>();
+
+
+      for(Item item : items){
+
+        if(item.getVariantId().equals(variantId)){
+
+          if(items.size() == 1){
+            sellers.remove(seller);    
+          }
+          else{
+            items.remove(item);
+            seller.setItems(items);
+          }
+
+          cart.setSellers(sellers);
+          cartRepository.save(cart);
+
+        }
+        else{
+          ItemResponse itemResponse = productClient.getProductByVariantId(item.getVariantId());
+          itemResponse.setQuantity(item.getQuantity());      
+          itemResponse.setUpdatedAt(item.getUpdatedAt());
+          itemResponses.add(itemResponse);
+        }
+
+      
+      }
+
+      if(items.size() > 1){
+        SellerResponse sellerResponse = SellerResponse.builder()
+        .sellerId(sellerId)
+        .sellerUsername(sellerUsername)
+        .itemResponses(itemResponses)
+        .updatedAt(seller.getUpdatedAt())
+        .build();
+
+        sellerResponses.add(sellerResponse);
+      }
+      
+     
+    }
+
+    return sellerResponses;
+
+    // throw new AppException(ErrorCode.CART_NOT_FOUND);
+  }
+
   @PreAuthorize("hasRole('ROLE_USER')")
   public CartResponse update(CartUpdateRequest request){
     String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
@@ -164,12 +352,12 @@ public class CartService {
 
     Set<Seller> sellers = cart.getSellers();
     for(Seller seller : sellers){
-      Set<CartItem> cartItems = seller.getCartItems();
-      for(CartItem cartItem : cartItems){
+      Set<Item> cartItems = seller.getItems();
+      for(Item cartItem : cartItems){
         if(cartItem.getVariantId().equals(request.getVariantId())){
           cartItem.setQuantity(request.getQuantity());
 
-          seller.setCartItems(cartItems);
+          seller.setItems(cartItems);
           cart.setSellers(sellers);
           cartRepository.save(cart);
 
@@ -180,7 +368,7 @@ public class CartService {
       }
     }
 
-    // CartItem cartItem = CartItem.builder()
+    // Item cartItem = Item.builder()
     // .variantId(request.getVariantId())
     // .quantity(request.getQuantity())
     // .build();
@@ -193,7 +381,7 @@ public class CartService {
   }
 
   @PreAuthorize("hasRole('ROLE_USER')")
-  public CartResponse deleteCartItem(String cartItemId){
+  public CartResponse deleteItem(String variantId){
     String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
     if(!userClient.doesUserExistByEmail(email)){
       throw new AppException(ErrorCode.UNAUTHENTICATED);
@@ -205,12 +393,12 @@ public class CartService {
 
     Set<Seller> sellers = cart.getSellers();
     for(Seller seller : sellers){
-      Set<CartItem> cartItems = seller.getCartItems();
-      for(CartItem cartItem : cartItems){
-        if(cartItem.getId().equals(cartItemId)){
+      Set<Item> cartItems = seller.getItems();
+      for(Item cartItem : cartItems){
+        if(cartItem.getVariantId().equals(variantId)){
           cartItems.remove(cartItem);
 
-          seller.setCartItems(cartItems);
+          seller.setItems(cartItems);
           cart.setSellers(sellers);
 
           cartRepository.save(cart);
@@ -243,7 +431,7 @@ public class CartService {
 
     Set<Seller> sellers = cart.getSellers();
     for(Seller seller : sellers){
-      if(seller.getId().equals(sellerId)){
+      if(seller.getSellerId().equals(sellerId)){
         sellers.remove(seller);
 
         cart.setSellers(sellers);
@@ -260,5 +448,47 @@ public class CartService {
     throw new AppException(ErrorCode.CART_NOT_FOUND);
   }
 
+ 
+  @PreAuthorize("hasRole('ROLE_USER')")
+  public Set<SellerResponse> deleteSellerById(String sellerId){
+    Cart cart = cartRepository.findByUserId(sellerId).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+    Set<SellerResponse> sellerResponses = new HashSet<>();
+    Set<Seller> sellers = cart.getSellers();
+    for(Seller seller : sellers) {
+ 
+      if(seller.getSellerId().equals(sellerId)){
+        sellers.remove(seller);
+        cart.setSellers(sellers);
+
+        cartRepository.save(cart);
+      }
+      else{
+        String sellerUsername = userClient.username(sellerId);
+        Set<ItemResponse> itemResponses = new HashSet<>();
+        Set<Item> items = seller.getItems();
+
+        for(Item item : items){
+    
+          ItemResponse itemResponse = productClient.getProductByVariantId(item.getVariantId());
+          itemResponse.setQuantity(item.getQuantity());      
+          itemResponse.setUpdatedAt(item.getUpdatedAt());
+          itemResponses.add(itemResponse);
+  
+        }
+
+        SellerResponse sellerResponse = SellerResponse.builder()
+          .sellerId(sellerId)
+          .sellerUsername(sellerUsername)
+          .itemResponses(itemResponses)
+          .updatedAt(seller.getUpdatedAt())
+          .build();
+
+          sellerResponses.add(sellerResponse);
+      }
+    }
+  
+    return sellerResponses;
+    
+  }
   
 }

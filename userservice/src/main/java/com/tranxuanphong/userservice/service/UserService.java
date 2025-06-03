@@ -67,13 +67,16 @@ public class UserService {
   public UserResponse updatePassword(UserUpdatePasswordRequest request){
     String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
     User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED)); 
-    
+    System.out.println("email: " + email);
+
     if(request.getPassword() != null)
       user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-    if(request.getUsername() != null && userRepository.existsByUsername(request.getUsername())){
+    if(request.getUsername() != null && !userRepository.existsByUsername(request.getUsername())){
       user.setUsername(request.getUsername());
     }
+
+    System.out.println("user name: " + request.getUsername());
 
     return userMapper.toUserResponse(userRepository.save(user));
   }
@@ -145,10 +148,19 @@ public class UserService {
     return userRepository.existsByEmail(email);
   }
 
-  
-
   public String getUserId(String email){
     User user = userRepository.findByEmail(email).orElseThrow(()-> new AppException(ErrorCode.UNAUTHENTICATED));
     return user.getId();
+  }
+
+  public String getUsernameByEmail(String email){
+    User user = userRepository.findByEmail(email).orElseThrow(()-> new AppException(ErrorCode.UNAUTHENTICATED));
+    return user.getUsername();
+  }
+
+  public String getUsernameById(String id){
+    User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+
+    return user.getUsername();
   }
 }

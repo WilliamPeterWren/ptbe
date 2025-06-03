@@ -5,12 +5,9 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017/userservice
       database: userservice
-  
+      
 server:
   port: 8081
-jwt:
-  signerKey: "WjG25z4tA+dZX3clK+u0/kRg1tCdV6vvaizOfsJLgy4HFasdkfwxKso+KlGArOm4uOdkai"
-  valid-duration: 36000
 eureka:
   client:
     register-with-eureka: true
@@ -22,6 +19,10 @@ eureka:
     hostname: localhost
     ip-address: 127.0.0.1
     instance-id: ${spring.application.name}:localhost:${server.port}
+
+jwt:
+  signerKey: "WjG25z4tA+dZX3clK+u0/kRg1tCdV6vvaizOfsJLgy4HFasdkfwxKso+KlGArOm4uOdkai"
+  valid-duration: 36000
 
 frontend:
   port: 3000

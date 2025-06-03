@@ -41,4 +41,6 @@ public class ProductCreateRequest {
   @NotEmpty(message = "At least one info is required")
   @Valid
   Set<Info> infos;
+
+  String shippingId;
 }
