@@ -3,8 +3,13 @@ package com.tranxuanphong.productservice.service;
 
 import com.tranxuanphong.productservice.configuration.SecurityConfig;
 import com.tranxuanphong.productservice.dto.response.ReviewResponse;
+import com.tranxuanphong.productservice.dto.response.UserResponse;
+import com.tranxuanphong.productservice.entity.Product;
 import com.tranxuanphong.productservice.entity.Review;
+import com.tranxuanphong.productservice.exception.AppException;
+import com.tranxuanphong.productservice.exception.ErrorCode;
 import com.tranxuanphong.productservice.repository.httpclient.UserClient;
+import com.tranxuanphong.productservice.repository.mongo.ProductRepository;
 import com.tranxuanphong.productservice.repository.mongo.ReviewRepository;
 
 import lombok.AccessLevel;
@@ -16,11 +21,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -30,12 +38,35 @@ import java.util.Optional;
 public class ReviewService {
 
     ReviewRepository reviewRepository;
+    ProductRepository productRepository;
     UserClient userClient;
     ModelMapper modelMapper;
 
     @PreAuthorize("hasRole('ROLE_USER')")
     public Review createReview(Review review) {
-        
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String authToken = null;
+        if (authentication != null && authentication.getCredentials() instanceof String) {
+          authToken = (String) authentication.getCredentials();
+        } else if (authentication != null && authentication.getPrincipal() instanceof org.springframework.security.oauth2.jwt.Jwt) {
+          authToken = ((org.springframework.security.oauth2.jwt.Jwt) authentication.getPrincipal()).getTokenValue();
+        }
+    
+        if (authToken == null) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+        String authorizationHeader = "Bearer " + authToken;
+
+        Product product = productRepository.findById(review.getProductId()).orElseThrow(() -> new AppException(ErrorCode.PRODUCTID_INVALID));
+        System.out.println("commet ok");
+        Map<Integer, Long> rating = product.getRating();
+        int star = review.getStar();
+        rating.put(star, rating.getOrDefault(star, 0L) + 1);
+        product.setRating(rating);
+System.out.println("this ok");
+        UserResponse userResponse = userClient.updateRatingBySellerId(star, product.getSellerId(), authorizationHeader);
+System.out.println("user respons ok");
         return reviewRepository.save(review);
     }
 

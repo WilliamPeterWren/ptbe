@@ -2,6 +2,7 @@ package com.tranxuanphong.userservice.service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,7 @@ import com.tranxuanphong.userservice.dto.request.LoginRequest;
 import com.tranxuanphong.userservice.dto.request.RegisterRequest;
 import com.tranxuanphong.userservice.dto.request.UserUpdatePasswordRequest;
 import com.tranxuanphong.userservice.dto.response.LoginResponse;
+import com.tranxuanphong.userservice.dto.response.SellerInfoResponse;
 import com.tranxuanphong.userservice.dto.response.UserResponse;
 import com.tranxuanphong.userservice.entity.Role;
 import com.tranxuanphong.userservice.entity.User;
@@ -23,6 +25,7 @@ import com.tranxuanphong.userservice.entity.User;
 import com.tranxuanphong.userservice.exception.AppException;
 import com.tranxuanphong.userservice.exception.ErrorCode;
 import com.tranxuanphong.userservice.mapper.UserMapper;
+import com.tranxuanphong.userservice.repository.httpclient.ProductClient;
 import com.tranxuanphong.userservice.repository.mongo.RoleRepository;
 import com.tranxuanphong.userservice.repository.mongo.UserRepository;
 
@@ -42,6 +45,8 @@ public class UserService {
   PasswordEncoder passwordEncoder;
   RoleRepository roleRepository;
   AuthenticationService authenticationService;
+
+  ProductClient productClient;
 
   public UserResponse register(RegisterRequest request){
 
@@ -87,7 +92,6 @@ public class UserService {
   }
 
   @PreAuthorize("hasRole('ROLE_ADMIN')")
-  // @PreAuthorize("hasAuthority('APPROVE_POST')")
   public List<UserResponse> getAll(){
     var authentication = SecurityContextHolder.getContext().getAuthentication(); 
     log.info("getUsers authentication: {}, username: {}", authentication, authentication.getName()); 
@@ -96,7 +100,6 @@ public class UserService {
     List<User> listUser = userRepository.findAll();
     return userMapper.toListUserResponse(listUser);
   }
-
 
   public LoginResponse login(LoginRequest request) {
     User user = userRepository.findByEmail(request.getEmail())
@@ -162,5 +165,81 @@ public class UserService {
     User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
     return user.getUsername();
+  }
+
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  public void adminUpdateAllUser(){
+    List<User> list = userRepository.findAll();
+    for(User user : list){
+      user.setFollower(null);
+      user.setFollowing(null);
+      user.setRating(null);
+      user.setAvatar("");
+
+      userRepository.save(user);
+    }
+  }
+
+  public SellerInfoResponse getSellerInfo(String sellerId){
+    User user = userRepository.findById(sellerId).orElseThrow(()->new AppException(ErrorCode.UNAUTHENTICATED));
+  
+    int countProduct = 0;
+
+    try {
+      countProduct = productClient.countProductBySellerId(sellerId);
+    } catch (Exception e) {
+      System.out.println("count product error: " + e.getMessage());
+    }
+
+    int follower = user.getFollower().size();
+    int following = user.getFollowing().size();
+
+    Map<Integer, Long> rating = user.getRating();
+
+    int countRating = 0;
+
+    double star = 0;
+    long totalCount = 0;
+    long weightedSum = 0;
+
+    for (Map.Entry<Integer, Long> entry : rating.entrySet()) {
+      int key = entry.getKey();     
+      long value = entry.getValue(); 
+
+      countRating += (int)value;
+
+      weightedSum += key * value;
+      totalCount += value;
+    }
+
+    if (totalCount > 0) {
+      star = (double) weightedSum / totalCount;
+    }
+  
+
+    SellerInfoResponse sellerInfoResponse = SellerInfoResponse.builder()
+    .sellerId(sellerId)
+    .sellerUsername(user.getUsername())
+    .createdAt(user.getCreatedAt())
+    .countProduct(countProduct)
+    .follower(follower)
+    .following(following)
+    .rating(countRating)
+    .star(star)
+    .avatar(user.getAvatar())
+    .build();
+
+    return sellerInfoResponse;
+  }
+
+  @PreAuthorize("hasRole('ROLE_USER')")
+  public UserResponse updateRatingBySellerId(int star, String sellerId){
+    User user = userRepository.findById(sellerId).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+  
+    Map<Integer, Long> rating = user.getRating();
+    rating.put(star, rating.getOrDefault(star, 0L) + 1);
+    user.setRating(rating);
+
+    return userMapper.toUserResponse(userRepository.save(user));
   }
 }

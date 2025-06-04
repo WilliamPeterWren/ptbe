@@ -25,7 +25,6 @@ import com.tranxuanphong.orderservice.model.Shipping;
 import com.tranxuanphong.orderservice.model.ShippingVoucher;
 import com.tranxuanphong.orderservice.repository.httpclient.UserClient;
 import com.tranxuanphong.orderservice.repository.mongo.OrderRepository;
-import com.tranxuanphong.orderservice.repository.mongo.custom.impl.CustomOrderRepositoryImpl;
 import com.tranxuanphong.orderservice.repository.httpclient.PeterClient;
 import com.tranxuanphong.orderservice.repository.httpclient.ProductClient;
 import org.springframework.security.core.Authentication;

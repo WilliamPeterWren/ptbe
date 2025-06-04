@@ -155,10 +155,10 @@ public class ProductController {
   //   productService.updateAllProductsWithDefaultAvailable();
   // }
 
-  // @PostMapping("/update/all/rating")
-  // public void postMethodName() {
-  //   productService.updateAllProductsWithDefaultAvailable();
-  // }
+  @PostMapping("/update/all/rating")
+  public void postMethodName() {
+    productService.updateAllProductsWithDefaultAvailable();
+  }
 
   @GetMapping("/search/product/productname/{productname}")
   public Page<ProductResponse> searchProductByProductName(@PathVariable String productname,
@@ -183,10 +183,28 @@ public class ProductController {
     .result(productService.updateRatingById(id, rating))
     .build();
   }
+
+  @GetMapping("/count/seller/{sellerId}")
+  public int countProductBySellerId(@PathVariable String sellerId) {
+    return productService.countProductBySellerId(sellerId);
+  }
+
+  @PostMapping("/update/views/id/{id}")
+  public void updateProductViews(@PathVariable String id) {
+    productService.updateProductViews(id);
+  }
+
+  @PostMapping("/update/views/slug/{slug}")
+  public void updateProductViewsBySLug(@PathVariable String slug) {
+    productService.updateProductViewsBySLug(slug);
+  }
+  
+  @GetMapping("/rand/seller/id/{sellerId}/limit/{limit}")
+  public ApiResponse<List<ProductResponse>> getRandomProductBySellerId(@PathVariable String sellerId, @PathVariable int limit) {
+    return ApiResponse.<List<ProductResponse>>builder()
+    .result(productService.getRandomProductBySellerId(sellerId, limit))
+    .build();
+  }
+  
 }
-
-
-  
-  
-
 

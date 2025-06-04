@@ -3,6 +3,11 @@ package com.tranxuanphong.productservice.repository.httpclient;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+
+import com.tranxuanphong.productservice.dto.response.UserResponse;
+
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -22,4 +27,7 @@ public interface UserClient {
 
   @GetMapping(value = "/api/users/get/username/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   String usernameByUserId(@PathVariable String id);
+
+  @PostMapping("/api/users/update/rating/star/{star}/seller/id/{sellerId}")
+  UserResponse updateRatingBySellerId(@PathVariable int star, @PathVariable String sellerId, @RequestHeader("Authorization") String authorizationHeader);
 }

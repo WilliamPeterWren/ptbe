@@ -37,7 +37,8 @@ public class SecurityConfig {
     "/api/users/check/email/{email}",
     "/api/users/get/userid/email/{email}",    
     "/api/users/get/username/email/{email}",
-    "/api/users/get/username/id/{id}"
+    "/api/users/get/username/id/{id}",
+    "/api/users/get/seller/info/id/{sellerId}"
 
     // "/api/addresses/**",
   };

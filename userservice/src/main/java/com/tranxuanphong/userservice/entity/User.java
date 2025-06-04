@@ -1,7 +1,9 @@
 package com.tranxuanphong.userservice.entity;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.data.annotation.Id;
@@ -33,6 +35,17 @@ public class User {
   String username;
 
   String password;
+
+  @Builder.Default
+  Set<String> follower = new HashSet<>();
+  
+  @Builder.Default
+  Set<String> following = new HashSet<>();
+  
+  @Builder.Default
+  Map<Integer, Long> rating = new HashMap<>();
+  
+  String avatar;
 
   @Builder.Default
   String addressId = null;

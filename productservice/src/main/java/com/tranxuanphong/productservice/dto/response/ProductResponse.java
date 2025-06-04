@@ -36,6 +36,8 @@ public class ProductResponse {
 
   Map<Integer, Long> rating;
 
+  Long views;
+
   boolean isActive;
   
   Long sold;

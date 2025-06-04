@@ -21,6 +21,7 @@ import com.tranxuanphong.userservice.dto.request.RegisterRequest;
 import com.tranxuanphong.userservice.dto.request.UserUpdatePasswordRequest;
 import com.tranxuanphong.userservice.dto.response.ApiResponse;
 import com.tranxuanphong.userservice.dto.response.LoginResponse;
+import com.tranxuanphong.userservice.dto.response.SellerInfoResponse;
 import com.tranxuanphong.userservice.dto.response.UserResponse;
 import com.tranxuanphong.userservice.service.UserService;
 
@@ -105,6 +106,20 @@ public class UserController {
     return userService.getUsernameById(id);
   }
 
+  @GetMapping("/admin/update/all")
+  public void adminUpdateAllUser(){
+    userService.adminUpdateAllUser();
+  }
+
+  @GetMapping("/get/seller/info/id/{sellerId}")
+  public SellerInfoResponse getSellerInfoResponse(@PathVariable String sellerId){
+    return userService.getSellerInfo(sellerId);
+  }
+
+  @PostMapping("/update/rating/star/{star}/seller/id/{sellerId}")
+  public UserResponse updateRatingBySellerId(@PathVariable int star, @PathVariable String sellerId){
+    return userService.updateRatingBySellerId(star, sellerId);
+  }
 
 
 }

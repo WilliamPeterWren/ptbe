@@ -1,10 +1,8 @@
 package com.tranxuanphong.productservice.entity;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,13 +38,10 @@ public class Product {
     @Id
     String id;
 
-    // @Field(type = FieldType.Text)
     String sellerId;
 
-    // @Field(type = FieldType.Text)
     String productName;
 
-    // @Field(type = FieldType.Text)
     String categoryId;
 
     String peterCategory;
@@ -55,7 +50,6 @@ public class Product {
     String shippingId = "683b529e2a9cfc41ae6f134b"; 
 
     @Builder.Default
-    // @Field(type = FieldType.Nested)
     Set<String> productImages = new HashSet<>();
 
     @Builder.Default
@@ -64,11 +58,9 @@ public class Product {
     @Builder.Default
     Set<Info> infos = new HashSet<>();
 
-    // @Field(type = FieldType.Text)
     @Indexed(unique = true)
     String slug;
 
-    // @Field(type = FieldType.Text)
     String description;
 
     @Builder.Default
@@ -78,13 +70,14 @@ public class Product {
     Long sold = 0L;
 
     @Builder.Default
+    Long views = 0L;
+
+    @Builder.Default
     boolean isActive = true;
 
     @Builder.Default
-    // @Field(type = FieldType.Date)
     Instant createdAt = Instant.now();
 
     @Builder.Default
-    // @Field(type = FieldType.Date)
     Instant updatedAt = Instant.now();
 }

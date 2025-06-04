@@ -29,6 +29,8 @@ public class SecurityConfig {
     "/api/products/set/product/images/id/{id}",
     "/api/products/get/products/by/ids",
 
+    "/api/products/update/views/slug/{slug}"
+
   };
 
   private final String[] PUBLIC_ENDPOINTS_GET = {
@@ -48,6 +50,8 @@ public class SecurityConfig {
     "/api/products/get/product/peter/{peterCategoryId}",
     "/api/products/get/product/variant/id/{id}",
     "/api/products/get/cartproduct/variant/id/{id}",
+    "/api/products/count/seller/{sellerId}",
+    "/api/products/rand/seller/id/{sellerId}/limit/{limit}",
     
     "/api/products/check/product/{productId}/seller/{sellerId}",
     "/api/products/check/variant/id/{id}",
@@ -55,7 +59,6 @@ public class SecurityConfig {
     "/api/products/search/product/productname/{productname}",
 
     "/api/reviews/get/reviews/product/id/{id}",
-
   };
 
   // private String signerKey = "WjG25z4tA+dZX3clK+u0/kRg1tCdV6vvaizOfsJLgy4HFasdkfwxKso+KlGArOm4uOdkai";

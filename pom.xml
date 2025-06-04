@@ -18,6 +18,7 @@
         <module>orderservice</module>
         <module>fileservice</module>
         <module>peterservice</module>
+        <module>emailservice</module>
 
     </modules>
 

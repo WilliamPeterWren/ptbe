@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.tranxuanphong.productservice.dto.request.ProductCreateRequest;
 import com.tranxuanphong.productservice.dto.request.ProductUpdateRatingRequest;
 import com.tranxuanphong.productservice.dto.request.ProductUpdateRequest;
+import com.tranxuanphong.productservice.dto.response.ApiResponse;
 import com.tranxuanphong.productservice.dto.response.CartProductResponse;
 import com.tranxuanphong.productservice.dto.response.FlashSaleProductResponse;
 import com.tranxuanphong.productservice.dto.response.ProductResponse;
@@ -39,6 +40,7 @@ import java.text.Normalizer;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -423,7 +425,6 @@ public class ProductService {
     return product.getSellerId().equals(sellerId);
   }
 
-
   public boolean doesVariantExist(String variantId) {
     return productRepository.existsByVariantId(variantId);
   }
@@ -571,14 +572,15 @@ public class ProductService {
     List<Product> allProducts = productRepository.findAll();
 
     for (Product product : allProducts) {
-      if (product.getSold() == null) {
+      if (product.getViews() == null) {
         // product.setShippingId("683b529e2a9cfc41ae6f134b");
         // Map<Integer, Long> maps = new HashMap<>();
         // // maps.put(5,1L);
 
         // product.setRating(maps);
-        product.setSold(0L);
-        productRepository.save(product);
+        // product.setSold(0L);
+        // productRepository.save(product);
+        product.setViews(0L);
       }
     }
   }
@@ -598,6 +600,8 @@ public class ProductService {
   public ProductResponse updateSoldById(String id, Long sold){
     Product product = productRepository.findById(id).orElseThrow(()-> new AppException(ErrorCode.PRODUCTID_INVALID));
 
+    System.out.println("update sold: " + product.getSold() + sold);
+    
     product.setSold(product.getSold() + sold);
 
     return productMapper.toProductResponse(productRepository.save(product));
@@ -620,5 +624,33 @@ public class ProductService {
   }
 
 
+  public int countProductBySellerId(String sellerId){
+    List<Product> list = productRepository.findBySellerId(sellerId);
+    return list.size();
+  }
   
+
+  public void updateProductViews(String productId){
+    Product product = productRepository.findById(productId).orElseThrow(() -> new AppException(ErrorCode.PRODUCTID_INVALID));
+    product.setViews(product.getViews() + 1L);
+    productRepository.save(product);
+  }
+
+  public void updateProductViewsBySLug(String slug){
+    Product product = productRepository.findBySlug(slug).orElseThrow(() -> new AppException(ErrorCode.PRODUCTID_INVALID));
+    product.setViews(product.getViews() + 1L);
+    productRepository.save(product);
+  }
+
+  public List<ProductResponse> getRandomProductBySellerId(String sellerId, int limit){
+    List<Product> list = productRepository.findBySellerId(sellerId);
+
+    List<Product> mutableList = new ArrayList<>(list);
+
+    Collections.shuffle(mutableList);
+
+    List<Product> first10 = mutableList.subList(0, Math.min(10, list.size()));
+
+    return productMapper.toListProductResponse(first10);
+  }
 }
