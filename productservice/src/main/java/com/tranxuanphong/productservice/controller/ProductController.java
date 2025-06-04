@@ -10,7 +10,6 @@ import com.tranxuanphong.productservice.dto.response.ApiResponse;
 import com.tranxuanphong.productservice.dto.response.CartProductResponse;
 import com.tranxuanphong.productservice.dto.response.FlashSaleProductResponse;
 import com.tranxuanphong.productservice.dto.response.ProductResponse;
-import com.tranxuanphong.productservice.entity.Product;
 import com.tranxuanphong.productservice.service.ProductService;
 
 import lombok.AccessLevel;
@@ -119,7 +118,6 @@ public class ProductController {
   
   @PostMapping("/get/products/by/ids")
   public List<FlashSaleProductResponse> getProductImageMetadata(@RequestBody List<String> ids) {
-    System.out.println("yes contr");
     return productService.getListProductByIds(ids);
   }
 
@@ -175,6 +173,14 @@ public class ProductController {
   public ApiResponse<ProductResponse> updateSoldById(@PathVariable String id, @PathVariable Long sold) {
     return ApiResponse.<ProductResponse>builder()
     .result(productService.updateSoldById(id, sold))
+    .build();
+  }
+
+
+  @PutMapping("/rating/{rating}/product/id/{id}")
+  public ApiResponse<ProductResponse> updateRatingById(@PathVariable String id, @PathVariable Integer rating) {
+    return ApiResponse.<ProductResponse>builder()
+    .result(productService.updateRatingById(id, rating))
     .build();
   }
 }

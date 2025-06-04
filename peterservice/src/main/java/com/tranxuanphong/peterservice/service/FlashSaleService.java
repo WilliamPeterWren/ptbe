@@ -193,7 +193,7 @@ public class FlashSaleService {
       .productName(p.getProductName())
       .slug(p.getSlug())
       .price(p.getPrice())
-    
+      .salePrice(p.getSalePrice())
       .discount(flashSaleItem.getPrice())
       .username(p.getUsername())
       .stock(p.getStock())

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @FeignClient(name = "orderservice")
 public interface OrderClient {
-  @GetMapping(value = "/api/orderitems/exists-by-variantId/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/api/orders/exists-by-variantId/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   boolean existsByVariantId(@PathVariable String id);
 
 }

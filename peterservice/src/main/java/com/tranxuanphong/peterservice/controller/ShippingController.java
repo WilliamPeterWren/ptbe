@@ -29,6 +29,11 @@ public class ShippingController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/id/{id}")
+    public Shipping getShippingByIdd(@PathVariable String id) {
+        return shippingService.getShippingByIdd(id);
+    }
+
     @PostMapping
     public ResponseEntity<Shipping> createShipping(@RequestBody Shipping shipping) {
         return ResponseEntity.ok(shippingService.createShipping(shipping));

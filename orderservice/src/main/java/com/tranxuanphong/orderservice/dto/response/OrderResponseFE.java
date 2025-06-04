@@ -21,9 +21,12 @@ public class OrderResponseFE {
   String sellerId;
   String sellerUsername;
   Set<ItemResponse> items;
-  String shippingId;
-  String shippingVoucherId;
+
+  Long shippingPrice;
+  Long shippingVoucherPrice;
   String sellerVoucherId;
+  Long peterVoucher;
+
   String addressId;
   Set<Status> orderStatus;
   PaymentType paymentType;

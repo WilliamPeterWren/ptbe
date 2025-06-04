@@ -21,6 +21,8 @@ public class OrderCreateRequest {
 
   String sellerVoucherId;
 
+  String peterVoucher;
+
   String addressId;
 
   PaymentType paymentType;

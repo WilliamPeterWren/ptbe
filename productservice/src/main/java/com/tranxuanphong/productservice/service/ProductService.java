@@ -3,6 +3,7 @@ package com.tranxuanphong.productservice.service;
 import org.springframework.stereotype.Service;
 
 import com.tranxuanphong.productservice.dto.request.ProductCreateRequest;
+import com.tranxuanphong.productservice.dto.request.ProductUpdateRatingRequest;
 import com.tranxuanphong.productservice.dto.request.ProductUpdateRequest;
 import com.tranxuanphong.productservice.dto.response.CartProductResponse;
 import com.tranxuanphong.productservice.dto.response.FlashSaleProductResponse;
@@ -365,13 +366,10 @@ public class ProductService {
 
   @PreAuthorize("hasRole('ROLE_SELLER')")
   public ProductResponse delete(String id){
-    System.out.println("yes 00");
     String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
     String sellerId = userClient.userId(email);
-    System.out.println("yes 1");
 
     Product product = productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTS));
-    System.out.println("yes 2");
 
     if(!product.getSellerId().equals(sellerId)){
       throw new AppException(ErrorCode.PRODUCT_SELLER_NOT_MATCH);
@@ -380,20 +378,10 @@ public class ProductService {
     Set<Variant> variants = product.getVariants();
 
     boolean isDelete = true;
-    System.out.println("yes 3");
-
-    // for(Variant v: variants){
-    //   if(orderClient.existsByVariantId(v.getId())){
-    //     isDelete = false;
-    //     break;
-    //   }
-    // }
-
-    System.out.println("yes 4");
-
 
     if(isDelete){
-      productRepository.deleteById(id);
+      // productRepository.deleteById(id);
+      product.setActive(false);
     }
     else{
       for(Variant v: variants){
@@ -401,7 +389,7 @@ public class ProductService {
       }
     }
 
-    return productMapper.toProductResponse(product);
+    return productMapper.toProductResponse(productRepository.save(product));
   }
 
   @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -425,8 +413,6 @@ public class ProductService {
 
 
   }
-
-
 
   public boolean checkProductId(String id){
     return productRepository.existsById(id);
@@ -475,13 +461,10 @@ public class ProductService {
   }
 
   public List<FlashSaleProductResponse> getListProductByIds(List<String> ids){
-System.out.println("yes here...............");
     List<Product> products = productRepository.findByIdIn(ids);
 
     List<FlashSaleProductResponse> list = new ArrayList<>();
-System.out.println("abc");
     for(Product product : products){
-System.out.println("def");
 
       Set<Variant> setVariants = product.getVariants();
       // Long minPrice = Long.MAX_VALUE;
@@ -497,10 +480,8 @@ System.out.println("def");
 
       Variant variant = listVariants.get(0);
 
-      System.out.println("ghc");
 
       String sellerId = product.getSellerId();
-      System.out.println("sellerid: " +sellerId);
 
       String username = "";
       try {
@@ -511,7 +492,6 @@ System.out.println("def");
       }
 
 
-      System.out.println("user client check : " + variant.getSalePrice());
 
       FlashSaleProductResponse temp = FlashSaleProductResponse.builder()
       .id(product.getId())
@@ -587,7 +567,6 @@ System.out.println("def");
     .build();
   }
 
-
   public void updateAllProductsWithDefaultAvailable() {
     List<Product> allProducts = productRepository.findAll();
 
@@ -603,7 +582,6 @@ System.out.println("def");
       }
     }
   }
-
 
   public Page<ProductResponse> searchByProductName(String productName, int page, int size){
     // System.out.println("product name: " + productName);
@@ -624,4 +602,23 @@ System.out.println("def");
 
     return productMapper.toProductResponse(productRepository.save(product));
   }
+
+  @PreAuthorize("hasRole('ROLE_USER')")
+  public ProductResponse updateRatingById(String id, Integer rating){
+  
+    Product product = productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTS));
+
+    if (rating < 1 || rating > 5) {
+      throw new AppException(ErrorCode.INVALID_RATING); 
+    }
+
+    Map<Integer, Long> existingRating = product.getRating();
+
+    existingRating.merge(rating, 1L, Long::sum);
+  
+    return productMapper.toProductResponse(productRepository.save(product));
+  }
+
+
+  
 }

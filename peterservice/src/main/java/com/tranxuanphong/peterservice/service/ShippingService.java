@@ -2,6 +2,8 @@ package com.tranxuanphong.peterservice.service;
 
 
 import com.tranxuanphong.peterservice.entity.Shipping;
+import com.tranxuanphong.peterservice.exception.AppException;
+import com.tranxuanphong.peterservice.exception.ErrorCode;
 import com.tranxuanphong.peterservice.repository.mongo.ShippingRepository;
 import com.tranxuanphong.peterservice.utils.GenerateSlug;
 
@@ -27,6 +29,10 @@ public class ShippingService {
 
     public Optional<Shipping> getShippingById(String id) {
         return shippingRepository.findById(id);
+    }
+
+    public Shipping getShippingByIdd(String id) {
+        return shippingRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INVALID_KEY));
     }
 
     public Shipping createShipping(Shipping shipping) {

@@ -52,7 +52,9 @@ public class SecurityConfig {
     "/api/products/check/product/{productId}/seller/{sellerId}",
     "/api/products/check/variant/id/{id}",
     "/api/products/check/**",
-    "/api/products/search/product/productname/{productname}"
+    "/api/products/search/product/productname/{productname}",
+
+    "/api/reviews/get/reviews/product/id/{id}",
 
   };
 
@@ -105,6 +107,6 @@ public class SecurityConfig {
 
   @Bean 
   PasswordEncoder passwordEncoder() { 
-      return new BCryptPasswordEncoder(10); 
+    return new BCryptPasswordEncoder(10); 
   }
 }

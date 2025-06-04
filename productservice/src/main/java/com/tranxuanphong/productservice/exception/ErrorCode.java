@@ -48,6 +48,7 @@ public enum ErrorCode {
   INFO_NAME_DUPLICATE(1013,"info name duplicate ...", HttpStatus.BAD_REQUEST),
   SELLER_NOT_EXIST(1013,"seller not exists ...", HttpStatus.NOT_FOUND),
   SELLER_EXIST(1013,"seller already exists ...", HttpStatus.BAD_REQUEST),
+  INVALID_RATING(1013,"rating from 1 to 5 ...", HttpStatus.BAD_REQUEST),
   ; 
 
   int code; 

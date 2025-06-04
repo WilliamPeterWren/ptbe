@@ -25,7 +25,7 @@ public class OrderDataResponse {
   String shippingCode;
   
   Long shippingVoucher;
-
+  String peterVoucher;
   Long sellerVoucher;
 
   String paymentMethod;

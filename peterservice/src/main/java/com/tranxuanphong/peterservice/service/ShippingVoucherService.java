@@ -1,6 +1,8 @@
 package com.tranxuanphong.peterservice.service;
 
 import com.tranxuanphong.peterservice.entity.ShippingVoucher;
+import com.tranxuanphong.peterservice.exception.AppException;
+import com.tranxuanphong.peterservice.exception.ErrorCode;
 import com.tranxuanphong.peterservice.repository.mongo.ShippingVoucherRepository;
 import com.tranxuanphong.peterservice.service.ShippingVoucherService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,11 @@ public class ShippingVoucherService {
 
     public Optional<ShippingVoucher> getById(String id) {
         return repository.findById(id);
+    }
+
+    
+    public ShippingVoucher getByIdd(String id) {
+        return repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INVALID_KEY));
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_STAFF')")

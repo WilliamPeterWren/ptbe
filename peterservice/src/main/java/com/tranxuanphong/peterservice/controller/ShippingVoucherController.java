@@ -27,6 +27,11 @@ public class ShippingVoucherController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/id/{id}")
+    public ShippingVoucher getByIdd(@PathVariable String id) {
+        return service.getByIdd(id);
+    }
+
     @PostMapping
     public ResponseEntity<ShippingVoucher> create(@RequestBody ShippingVoucher voucher) {
         return ResponseEntity.ok(service.create(voucher));

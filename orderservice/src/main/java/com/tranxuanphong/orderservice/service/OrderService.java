@@ -20,10 +20,13 @@ import com.tranxuanphong.orderservice.exception.AppException;
 import com.tranxuanphong.orderservice.exception.ErrorCode;
 import com.tranxuanphong.orderservice.mapper.OrderMapper;
 import com.tranxuanphong.orderservice.model.ItemResponse;
-import com.tranxuanphong.orderservice.model.Variant;
+import com.tranxuanphong.orderservice.model.PeterVoucher;
+import com.tranxuanphong.orderservice.model.Shipping;
+import com.tranxuanphong.orderservice.model.ShippingVoucher;
 import com.tranxuanphong.orderservice.repository.httpclient.UserClient;
 import com.tranxuanphong.orderservice.repository.mongo.OrderRepository;
 import com.tranxuanphong.orderservice.repository.mongo.custom.impl.CustomOrderRepositoryImpl;
+import com.tranxuanphong.orderservice.repository.httpclient.PeterClient;
 import com.tranxuanphong.orderservice.repository.httpclient.ProductClient;
 import org.springframework.security.core.Authentication;
 
@@ -36,8 +39,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-// import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 
@@ -46,10 +49,10 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class OrderService {
   OrderRepository orderRepository;
-  CustomOrderRepositoryImpl customOrderRepositoryImpl;
 
   UserClient userClient;
   ProductClient productClient;
+  PeterClient peterClient;
 
   OrderMapper orderMapper;
 
@@ -119,19 +122,17 @@ public class OrderService {
 
     String authToken = null;
     if (authentication != null && authentication.getCredentials() instanceof String) {
-          authToken = (String) authentication.getCredentials();
+      authToken = (String) authentication.getCredentials();
     } else if (authentication != null && authentication.getPrincipal() instanceof org.springframework.security.oauth2.jwt.Jwt) {
-        // If you are using Spring Security's OAuth2 Resource Server with JWTs
-        authToken = ((org.springframework.security.oauth2.jwt.Jwt) authentication.getPrincipal()).getTokenValue();
+      authToken = ((org.springframework.security.oauth2.jwt.Jwt) authentication.getPrincipal()).getTokenValue();
     }
 
     if (authToken == null) {
-        // Handle case where token is not found in security context, though PreAuthorize should prevent this usually
-        throw new AppException(ErrorCode.UNAUTHENTICATED); // Or a more specific error
+        throw new AppException(ErrorCode.UNAUTHENTICATED);
     }
     String authorizationHeader = "Bearer " + authToken;
 
-    //update product.sold if request.getOrderStatus() == DELIVERD
+    //update product.sold if request.getOrderStatus() == DELIVERD only  shipper
     System.out.println("start....");
     if(request.getOrderStatus().equals(OrderStatus.DELIVERD)){
       Set<OrderItem> orderItems = order.getOrderItems();
@@ -153,11 +154,9 @@ public class OrderService {
     String customerEmail = SecurityContextHolder.getContext().getAuthentication().getName(); 
     String customerId = userClient.userId(customerEmail);
 
-    System.out.println("yes 00");
 
     Page<Order> listOrders = orderRepository.findByUserIdOrderByCreatedAtDesc(customerId, PageRequest.of(page, size));
 
-    System.out.println("yes 01");
     Page<OrderResponseFE> pageOrderResponseFE = listOrders.map(order -> {
       Set<ItemResponse> items = order.getOrderItems().stream().map(item -> {
         ProductResponse productResponse =  productClient.getProductByVariantId(item.getVariantId());
@@ -176,15 +175,45 @@ public class OrderService {
       }).collect(Collectors.toSet());
       String sellerUsername = userClient.usernameByUserId(order.getSellerId());
 
+
+      Long shippingPrice = 0L;
+      try{
+        Shipping shipping = peterClient.getShippingById(order.getShippingId());
+        shippingPrice = shipping.getValue();
+      }catch(Exception e){
+        System.out.println("shippping error: " + e.getMessage());
+      }
+
+      Long peterVoucherPrice = 0L;
+      try {
+        PeterVoucher peterVoucher = peterClient.getPeterVoucherById(order.getPeterVoucher());
+        peterVoucherPrice = peterVoucher.getValue();
+      } catch (Exception e) {
+        System.out.println("peter error: " + e.getMessage());
+
+      }
+
+      Long shippingVoucherPrice = 0L;
+      try {
+        ShippingVoucher shippingVoucher = peterClient.getShippingVoucherById(order.getShippingVoucherId());
+        shippingVoucherPrice = shippingVoucher.getPrice();
+      } catch (Exception e) {
+        System.out.println("shipping voucher error: " + e.getMessage());
+      }
+      
+
       return OrderResponseFE.builder()
         .id(order.getId())
         .userId(order.getUserId())
         .sellerId(order.getSellerId())
         .sellerUsername(sellerUsername)
         .items(items)
-        .shippingId(order.getShippingId())
-        .shippingVoucherId(order.getShippingVoucherId())
+
+        .shippingPrice(shippingPrice)
+        .shippingVoucherPrice(shippingVoucherPrice)
         .sellerVoucherId(order.getSellerVoucherId())
+        .peterVoucher(peterVoucherPrice)
+
         .addressId(order.getAddressId())
         .orderStatus(order.getOrderStatus())
         .paymentType(order.getPaymentType())        
@@ -205,7 +234,6 @@ public class OrderService {
     // .findOrdersByUserIdAndStatusSortedByStatusCreatedAt(customerId, "SELLER_CHECKING", pageable);
     List<Order> list = orderRepository.findByUserId(customerId);
 
-    System.out.println("user id: " + customerId);
 
     Set<OrderStatus> orderStatuses = new HashSet<>();
 
@@ -242,18 +270,15 @@ public class OrderService {
     }
 
     List<Order> listResponse = new ArrayList<>();
-    System.out.println("here");
     int count = 0;
     BREAKINTOHERE:
     for(Order order : list){
-      System.out.println("in loop");
       Set<Status> statusSet = order.getOrderStatus();
       List<Status> sortedStatusList = statusSet.stream()
         .sorted(Comparator.comparing(Status::getCreatedAt).reversed())
         .toList();
 
       for(OrderStatus status : orderStatuses){
-        System.out.println(status);
         if (!sortedStatusList.isEmpty() && sortedStatusList.get(0).getStatus().equals(status)) {
           listResponse.add(order);
           count++;
@@ -265,7 +290,6 @@ public class OrderService {
   
     }
 
-    System.out.println("out loop");
 
     List<OrderResponseFE> orderResponseFEList = listResponse.stream()
     .map(order -> {
@@ -287,15 +311,42 @@ public class OrderService {
 
       String sellerUsername = userClient.usernameByUserId(order.getSellerId());
 
+      Long shippingPrice = 0L;
+      try{
+        Shipping shipping = peterClient.getShippingById(order.getShippingId());
+        shippingPrice = shipping.getValue();
+      }catch(Exception e){
+        System.out.println("shippping error: " + e.getMessage());
+      }
+
+      Long peterVoucherPrice = 0L;
+      try {
+        PeterVoucher peterVoucher = peterClient.getPeterVoucherById(order.getPeterVoucher());
+        peterVoucherPrice = peterVoucher.getValue();
+      } catch (Exception e) {
+        System.out.println("peter error: " + e.getMessage());
+
+      }
+
+      Long shippingVoucherPrice = 0L;
+      try {
+        ShippingVoucher shippingVoucher = peterClient.getShippingVoucherById(order.getShippingVoucherId());
+        shippingVoucherPrice = shippingVoucher.getPrice();
+      } catch (Exception e) {
+        System.out.println("shipping voucher error: " + e.getMessage());
+      }
       return OrderResponseFE.builder()
         .id(order.getId())
         .userId(order.getUserId())
         .sellerId(order.getSellerId())
         .sellerUsername(sellerUsername)
         .items(items)
-        .shippingId(order.getShippingId())
-        .shippingVoucherId(order.getShippingVoucherId())
+
+        .shippingPrice(shippingPrice)
+        .shippingVoucherPrice(shippingVoucherPrice)
         .sellerVoucherId(order.getSellerVoucherId())
+        .peterVoucher(peterVoucherPrice)
+        
         .addressId(order.getAddressId())
         .orderStatus(order.getOrderStatus())
         .paymentType(order.getPaymentType())
@@ -311,5 +362,38 @@ public class OrderService {
     return pageOrderResponseFE;
   }
 
+
+  public void updateAllOrdersWithDefaultAvailable() {
+    List<Order> allOrders = orderRepository.findAll();
+
+    List<String> petervouchers = List.of("684010440414931d729faa42","6840106e0414931d729faa43", "6840107b0414931d729faa44", "684010860414931d729faa45", "6840108f0414931d729faa46");
+
+    List<String> shippings = List.of("683b529e2a9cfc41ae6f134b","683b52b92a9cfc41ae6f134c", "683b52cc2a9cfc41ae6f134d", "683b52df2a9cfc41ae6f134e");
+
+    List<String> shipvouchers = List.of("6840060e0414931d729faa3d", "684006180414931d729faa3e","684006250414931d729faa3f","6840062a0414931d729faa40", "6840063b0414931d729faa41");
+
+    for (Order order : allOrders) {     
+
+      int randomIndex1 = ThreadLocalRandom.current().nextInt(petervouchers.size());
+      String randomvoucher = petervouchers.get(randomIndex1);
+
+      int randomIndex2 = ThreadLocalRandom.current().nextInt(shippings.size());
+      String randomshipping = shippings.get(randomIndex2);
+
+      int randomIndex3 = ThreadLocalRandom.current().nextInt(shipvouchers.size());
+      String randomshippingvoucher = shipvouchers.get(randomIndex3);
+
+      order.setPeterVoucher(randomvoucher);
+      order.setShippingId(randomshipping);
+      order.setShippingVoucherId(randomshippingvoucher);
+
+      orderRepository.save(order);
+    }
+  }
+
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  public List<Order> getAllByAdmin(){
+    return orderRepository.findAll();
+  }
 
 }

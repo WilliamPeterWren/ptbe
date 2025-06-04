@@ -1,4 +1,4 @@
-package com.tranxuanphong.peterservice.dto.response;
+package com.tranxuanphong.orderservice.model;
 
 import java.time.Instant;
 

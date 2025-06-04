@@ -21,4 +21,7 @@ public class AddressResponse {
     String address;
 
     String phone;
+
+    Boolean gender;
+
 }

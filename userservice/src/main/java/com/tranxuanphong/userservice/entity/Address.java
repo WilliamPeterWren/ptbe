@@ -21,6 +21,7 @@ public class Address {
     String lastName;
 
     LocalDate dob;
+    Boolean gender;
 
     String address;
 

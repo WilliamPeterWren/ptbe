@@ -42,6 +42,8 @@ public class Order {
 
   String sellerVoucherId;
 
+  String peterVoucher;
+
   String addressId;
 
   PaymentType paymentType;

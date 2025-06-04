@@ -30,4 +30,6 @@ public class AddressCreateRequest {
   @PhoneConstraint(min = 10, message = "INVALID_PHONE")
   String phone;
 
+  Boolean gender;
+
 }

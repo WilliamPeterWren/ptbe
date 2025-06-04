@@ -8,6 +8,7 @@ import com.tranxuanphong.orderservice.dto.request.OrderUpdateRequest;
 import com.tranxuanphong.orderservice.dto.response.ApiResponse;
 import com.tranxuanphong.orderservice.dto.response.OrderResponse;
 import com.tranxuanphong.orderservice.dto.response.OrderResponseFE;
+import com.tranxuanphong.orderservice.entity.Order;
 import com.tranxuanphong.orderservice.enums.OrderStatus;
 import com.tranxuanphong.orderservice.service.OrderService;
 
@@ -70,5 +71,14 @@ public class OrderController {
   }
 
 
+  // @PutMapping("/admin/update")
+  // public void putMethodName() {
+  //     orderService.updateAllOrdersWithDefaultAvailable();    
+  // }
+
+  @GetMapping("/admin/getall")
+  public List<Order> getOrderAdmin() {
+    return orderService.getAllByAdmin();    
+  }
   
 }

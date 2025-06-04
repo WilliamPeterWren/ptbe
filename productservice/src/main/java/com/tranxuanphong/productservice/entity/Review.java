@@ -27,8 +27,14 @@ public class Review {
     String productId;
     String variantId;
     String comment;
-    String image;
+
+    @Builder.Default    
+    String image = null;
     int star;
-    Instant createdAt;
-    Instant updatedAt;
+
+    @Builder.Default
+    Instant createdAt = Instant.now();
+
+    @Builder.Default
+    Instant updatedAt = Instant.now();
 }

@@ -35,6 +35,8 @@ public class ProductResponse {
   String description;
 
   Map<Integer, Long> rating;
+
+  boolean isActive;
   
   Long sold;
 

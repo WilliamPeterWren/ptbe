@@ -42,6 +42,10 @@ public class PeterVoucherService {
         return peterVoucherMapper.toPeterVoucherResponse(peterVoucher);
     }
 
+    public PeterVoucher getVoucherById(String id) {
+        return peterVoucherRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PETER_VOUCHER_NOT_FOUND));    
+    }
+
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_STAFF')")
     public PeterVoucherResponse create(PeterVoucherCreateRequest request) {
         PeterVoucher peterVoucher = peterVoucherMapper.toPeterVoucher(request);

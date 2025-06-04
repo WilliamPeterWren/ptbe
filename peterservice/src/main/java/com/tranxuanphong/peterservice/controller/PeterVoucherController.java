@@ -35,6 +35,11 @@ public class PeterVoucherController {
         .build();
     }
 
+    @GetMapping("/id/{id}")
+    public PeterVoucher getVoucherById(@PathVariable String id) {
+        return peterVoucherService.getVoucherById(id);
+    }
+
     @PostMapping
     public ApiResponse<PeterVoucherResponse> create(@RequestBody PeterVoucherCreateRequest request) {
         return ApiResponse.<PeterVoucherResponse>builder()

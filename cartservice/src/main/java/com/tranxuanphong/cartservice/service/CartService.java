@@ -2,6 +2,7 @@ package com.tranxuanphong.cartservice.service;
 
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -270,69 +271,62 @@ public class CartService {
     return sellerResponses;
   }
   
+
   @PreAuthorize("hasRole('ROLE_USER')")
-  public Set<SellerResponse> deletee(String variantId){
-    String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
-    if(!userClient.doesUserExistByEmail(email)){
+  public Set<SellerResponse> deletee(String variantId) {
+    String email = SecurityContextHolder.getContext().getAuthentication().getName();
+    if (!userClient.doesUserExistByEmail(email)) {
       throw new AppException(ErrorCode.UNAUTHENTICATED);
     }
 
     String sellerId = userClient.userId(email);
 
-    Cart cart = cartRepository.findByUserId(sellerId).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
-   
+    Cart cart = cartRepository.findByUserId(sellerId)
+      .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+
     Set<SellerResponse> sellerResponses = new HashSet<>();
     Set<Seller> sellers = cart.getSellers();
-   
-    for(Seller seller : sellers){
-      String sellerUsername = userClient.username(sellerId);
+    boolean itemDeleted = false;
+
+    for (Iterator<Seller> sellerIterator = sellers.iterator(); sellerIterator.hasNext();) {
+      Seller seller = sellerIterator.next();
+      String sellerUsername = userClient.username(seller.getSellerId());
       Set<Item> items = seller.getItems();
       Set<ItemResponse> itemResponses = new HashSet<>();
 
-
-      for(Item item : items){
-
-        if(item.getVariantId().equals(variantId)){
-
-          if(items.size() == 1){
-            sellers.remove(seller);    
-          }
-          else{
-            items.remove(item);
-            seller.setItems(items);
-          }
-
-          cart.setSellers(sellers);
-          cartRepository.save(cart);
-
-        }
-        else{
+      for (Iterator<Item> itemIterator = items.iterator(); itemIterator.hasNext();) {
+        Item item = itemIterator.next();
+        if (item.getVariantId().equals(variantId)) {
+          itemIterator.remove(); 
+          itemDeleted = true;
+        } else {
           ItemResponse itemResponse = productClient.getProductByVariantId(item.getVariantId());
-          itemResponse.setQuantity(item.getQuantity());      
+          itemResponse.setQuantity(item.getQuantity());
           itemResponse.setUpdatedAt(item.getUpdatedAt());
           itemResponses.add(itemResponse);
         }
-
-      
       }
 
-      if(items.size() > 1){
-        SellerResponse sellerResponse = SellerResponse.builder()
-        .sellerId(sellerId)
-        .sellerUsername(sellerUsername)
-        .itemResponses(itemResponses)
-        .updatedAt(seller.getUpdatedAt())
-        .build();
+      if (items.isEmpty()) {
+        sellerIterator.remove();
+      } else {
+          seller.setItems(items);
+          SellerResponse sellerResponse = SellerResponse.builder()
+            .sellerId(seller.getSellerId())
+            .sellerUsername(sellerUsername)
+            .itemResponses(itemResponses)
+            .updatedAt(seller.getUpdatedAt())
+            .build();
+          sellerResponses.add(sellerResponse);
+        }
+    }
 
-        sellerResponses.add(sellerResponse);
-      }
-      
-     
+    if (itemDeleted) {
+      cart.setSellers(sellers);
+      cartRepository.save(cart);
     }
 
     return sellerResponses;
-
-    // throw new AppException(ErrorCode.CART_NOT_FOUND);
   }
 
   @PreAuthorize("hasRole('ROLE_USER')")
@@ -392,6 +386,7 @@ public class CartService {
     Cart cart = cartRepository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
     Set<Seller> sellers = cart.getSellers();
+    OUTTERFOR:
     for(Seller seller : sellers){
       Set<Item> cartItems = seller.getItems();
       for(Item cartItem : cartItems){
@@ -403,15 +398,15 @@ public class CartService {
 
           cartRepository.save(cart);
 
-          return CartResponse.builder()
-          .sellers(sellers)
-          .build();
+          break OUTTERFOR;
         }
       }
     }
 
-
-    throw new AppException(ErrorCode.CART_NOT_FOUND);
+    return CartResponse.builder()
+    .sellers(sellers)
+    .build();
+    // throw new AppException(ErrorCode.CART_NOT_FOUND);
   }
 
   @PreAuthorize("hasRole('ROLE_USER')")

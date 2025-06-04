@@ -23,6 +23,7 @@ public class OrderResponse {
   String shippingId;
   String shippingVoucherId;
   String sellerVoucherId;
+  String peterVoucher;
   String addressId;
   Set<Status> orderStatus;
   PaymentType paymentType;
