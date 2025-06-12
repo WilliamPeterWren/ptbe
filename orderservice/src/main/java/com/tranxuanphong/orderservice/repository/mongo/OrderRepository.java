@@ -25,7 +25,19 @@ public interface OrderRepository extends MongoRepository<Order, String> {
 
   Page<Order> findByUserIdOrderByCreatedAtDesc(String userId, Pageable pageable);
 
+  Page<Order> findByUserIdOrderByUpdatedAtDesc(String userId, Pageable pageable);
+
+  List<Order> findByUserIdOrderByUpdatedAtDesc(String userId);
+
   Page<Order> findBySellerIdOrderByCreatedAtDesc(String sellerId, Pageable pageable);
+
+  Page<Order> findBySellerIdOrderByUpdatedAtDesc(String sellerId, Pageable pageable);
+
+  List<Order> findBySellerIdOrderByUpdatedAtDesc(String sellerId);
+
+  Page<Order> findByShipperIdOrderByUpdatedAtDesc(String sellerId, Pageable pageable);
+
+  List<Order> findByShipperIdOrderByUpdatedAtDesc(String sellerId);
 
   Page<Order> findByUserIdAndSellerIdOrderByCreatedAtDesc(String userId, String sellerId, Pageable pageable);
 

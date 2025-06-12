@@ -28,4 +28,13 @@ public class ShippingVoucher {
   String name;
   Long price;
   Instant expiredAt;
+
+  @Builder.Default
+  Boolean available = true;
+
+  @Builder.Default
+  Instant createdAt = Instant.now();
+
+  @Builder.Default
+  Instant updatedAt = Instant.now();
 }

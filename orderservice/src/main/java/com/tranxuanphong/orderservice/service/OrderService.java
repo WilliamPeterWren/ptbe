@@ -1,4 +1,5 @@
 package com.tranxuanphong.orderservice.service;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -8,7 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.tranxuanphong.orderservice.dto.request.OrderCreateRequest;
-import com.tranxuanphong.orderservice.dto.request.OrderUpdateRequest;
+import com.tranxuanphong.orderservice.dto.request.ReviewCheckRequest;
 import com.tranxuanphong.orderservice.dto.response.OrderResponse;
 import com.tranxuanphong.orderservice.dto.response.OrderResponseFE;
 import com.tranxuanphong.orderservice.dto.response.ProductResponse;
@@ -27,19 +28,16 @@ import com.tranxuanphong.orderservice.repository.httpclient.UserClient;
 import com.tranxuanphong.orderservice.repository.mongo.OrderRepository;
 import com.tranxuanphong.orderservice.repository.httpclient.PeterClient;
 import com.tranxuanphong.orderservice.repository.httpclient.ProductClient;
-import org.springframework.security.core.Authentication;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 
@@ -88,64 +86,17 @@ public class OrderService {
     order.setOrderStatus(setStatus);
     order.setUserId(customerId);
 
+    try {
+      userClient.updateUserPeterVoucher(request.getPeterVoucher(), customerId);
+    } catch (Exception e) {
+      System.out.println("erro: " + e.getMessage());
+    }
+
     return orderMapper.toOrderResponse(orderRepository.save(order));
   }
 
   public boolean doesAddressExist(String addressId){
     return orderRepository.existsByAddressId(addressId);
-  }
-
-  @PreAuthorize("hasAnyRole('ROLE_SHIPPER','ROLE_SELLER')")
-  public OrderResponse update(String orderId, OrderUpdateRequest request){
-    // String shipperEmail = SecurityContextHolder.getContext().getAuthentication().getName(); 
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String shipperEmail = authentication.getName();
-    String shipperId = userClient.userId(shipperEmail);
-
-    Order order = orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-
-
-    Set<Status> status = order.getOrderStatus();
-    Status updateStatus = Status.builder()
-    .shipperId(shipperId)
-    .status(request.getOrderStatus())
-    .build();
-
-    for(Status stt : status){
-      if(stt.getStatus().equals(request.getOrderStatus())){
-        throw new AppException(ErrorCode.ORDER_STATUS_INVALID);
-      }
-    }
-
-    status.add(updateStatus);
-
-    String authToken = null;
-    if (authentication != null && authentication.getCredentials() instanceof String) {
-      authToken = (String) authentication.getCredentials();
-    } else if (authentication != null && authentication.getPrincipal() instanceof org.springframework.security.oauth2.jwt.Jwt) {
-      authToken = ((org.springframework.security.oauth2.jwt.Jwt) authentication.getPrincipal()).getTokenValue();
-    }
-
-    if (authToken == null) {
-        throw new AppException(ErrorCode.UNAUTHENTICATED);
-    }
-    String authorizationHeader = "Bearer " + authToken;
-
-    //update product.sold if request.getOrderStatus() == DELIVERD only  shipper
-    System.out.println("start....");
-    if(request.getOrderStatus().equals(OrderStatus.DELIVERD)){
-      Set<OrderItem> orderItems = order.getOrderItems();
-      for(OrderItem orderItem : orderItems){        
-        ProductResponse productResponse = productClient.getProductByVariantId(orderItem.getVariantId());
-        System.out.println("product id: " + productResponse.getProductId() + " quanttiY: " + orderItem.getQuantity());
-        productClient.updateProductSold(productResponse.getProductId(),orderItem.getQuantity(), authorizationHeader);
-      }
-    }
-    System.out.println("end....");
-    order.setOrderStatus(status);
-    order.setUpdatedAt(Instant.now());
-
-    return orderMapper.toOrderResponse(orderRepository.save(order));
   }
 
   @PreAuthorize("hasRole('ROLE_USER')")
@@ -154,12 +105,25 @@ public class OrderService {
     String customerId = userClient.userId(customerEmail);
 
 
-    Page<Order> listOrders = orderRepository.findByUserIdOrderByCreatedAtDesc(customerId, PageRequest.of(page, size));
+    Page<Order> listOrders = orderRepository.findByUserIdOrderByUpdatedAtDesc(customerId, PageRequest.of(page, size));
 
     Page<OrderResponseFE> pageOrderResponseFE = listOrders.map(order -> {
       Set<ItemResponse> items = order.getOrderItems().stream().map(item -> {
         ProductResponse productResponse =  productClient.getProductByVariantId(item.getVariantId());
-        
+        boolean alreadyReview = false;
+
+        try {
+          ReviewCheckRequest request = ReviewCheckRequest.builder()
+          .userId(customerId)
+          .productId(productResponse.getProductId())
+          .variantId(item.getVariantId())
+          .orderId(order.getId())
+          .build();
+          alreadyReview = productClient.checkReviewByUserProductVariant(request);
+        } catch (Exception e) {
+          System.out.println("product service error: " + e.getMessage());
+        }
+
         return ItemResponse.builder()
           .salePrice(item.getSalePrice())
           .discount(item.getDiscount())
@@ -170,6 +134,7 @@ public class OrderService {
           .variantName(productResponse.getVariantName())     
           .productName(productResponse.getProductName())    
           .image(productResponse.getImage()) 
+          .alreadyReview(alreadyReview)
           .build();
       }).collect(Collectors.toSet());
       String sellerUsername = userClient.usernameByUserId(order.getSellerId());
@@ -229,10 +194,7 @@ public class OrderService {
     String customerEmail = SecurityContextHolder.getContext().getAuthentication().getName(); 
     String customerId = userClient.userId(customerEmail);
 
-    // Page<Order> listOrders = customOrderRepositoryImpl
-    // .findOrdersByUserIdAndStatusSortedByStatusCreatedAt(customerId, "SELLER_CHECKING", pageable);
-    List<Order> list = orderRepository.findByUserId(customerId);
-
+    List<Order> list = orderRepository.findByUserIdOrderByUpdatedAtDesc(customerId);
 
     Set<OrderStatus> orderStatuses = new HashSet<>();
 
@@ -292,8 +254,23 @@ public class OrderService {
 
     List<OrderResponseFE> orderResponseFEList = listResponse.stream()
     .map(order -> {
+
       Set<ItemResponse> items = order.getOrderItems().stream().map(item -> {
         ProductResponse productResponse = productClient.getProductByVariantId(item.getVariantId());
+
+        boolean alreadyReview = false;
+
+        try {
+          ReviewCheckRequest request = ReviewCheckRequest.builder()
+          .userId(customerId)
+          .productId(productResponse.getProductId())
+          .variantId(item.getVariantId())
+          .orderId(order.getId())
+          .build();
+          alreadyReview = productClient.checkReviewByUserProductVariant(request);
+        } catch (Exception e) {
+          System.out.println("product service error: " + e.getMessage());
+        }
 
         return ItemResponse.builder()
           .salePrice(item.getSalePrice())
@@ -305,6 +282,7 @@ public class OrderService {
           .variantName(productResponse.getVariantName())
           .productName(productResponse.getProductName())
           .image(productResponse.getImage())
+          .alreadyReview(alreadyReview)
           .build();
       }).collect(Collectors.toSet());
 
@@ -334,6 +312,7 @@ public class OrderService {
       } catch (Exception e) {
         System.out.println("shipping voucher error: " + e.getMessage());
       }
+
       return OrderResponseFE.builder()
         .id(order.getId())
         .userId(order.getUserId())
@@ -362,37 +341,6 @@ public class OrderService {
   }
 
 
-  public void updateAllOrdersWithDefaultAvailable() {
-    List<Order> allOrders = orderRepository.findAll();
 
-    List<String> petervouchers = List.of("684010440414931d729faa42","6840106e0414931d729faa43", "6840107b0414931d729faa44", "684010860414931d729faa45", "6840108f0414931d729faa46");
-
-    List<String> shippings = List.of("683b529e2a9cfc41ae6f134b","683b52b92a9cfc41ae6f134c", "683b52cc2a9cfc41ae6f134d", "683b52df2a9cfc41ae6f134e");
-
-    List<String> shipvouchers = List.of("6840060e0414931d729faa3d", "684006180414931d729faa3e","684006250414931d729faa3f","6840062a0414931d729faa40", "6840063b0414931d729faa41");
-
-    for (Order order : allOrders) {     
-
-      int randomIndex1 = ThreadLocalRandom.current().nextInt(petervouchers.size());
-      String randomvoucher = petervouchers.get(randomIndex1);
-
-      int randomIndex2 = ThreadLocalRandom.current().nextInt(shippings.size());
-      String randomshipping = shippings.get(randomIndex2);
-
-      int randomIndex3 = ThreadLocalRandom.current().nextInt(shipvouchers.size());
-      String randomshippingvoucher = shipvouchers.get(randomIndex3);
-
-      order.setPeterVoucher(randomvoucher);
-      order.setShippingId(randomshipping);
-      order.setShippingVoucherId(randomshippingvoucher);
-
-      orderRepository.save(order);
-    }
-  }
-
-  @PreAuthorize("hasRole('ROLE_ADMIN')")
-  public List<Order> getAllByAdmin(){
-    return orderRepository.findAll();
-  }
 
 }

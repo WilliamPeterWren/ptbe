@@ -1,9 +1,7 @@
 package com.tranxuanphong.userservice.service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.lang.module.ModuleDescriptor.Builder;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,41 +10,46 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import com.tranxuanphong.userservice.dto.request.EmailRequest;
 import com.tranxuanphong.userservice.dto.request.LoginRequest;
 import com.tranxuanphong.userservice.dto.request.RegisterRequest;
-import com.tranxuanphong.userservice.dto.request.UserUpdatePasswordRequest;
+import com.tranxuanphong.userservice.dto.request.UserUpdateRequest;
+import com.tranxuanphong.userservice.dto.response.ApiResponse;
+import com.tranxuanphong.userservice.dto.response.CartResponse;
 import com.tranxuanphong.userservice.dto.response.LoginResponse;
-import com.tranxuanphong.userservice.dto.response.SellerInfoResponse;
 import com.tranxuanphong.userservice.dto.response.UserResponse;
 import com.tranxuanphong.userservice.entity.Role;
 import com.tranxuanphong.userservice.entity.User;
-// import com.tranxuanphong.userservice.enums.Role;
 import com.tranxuanphong.userservice.exception.AppException;
 import com.tranxuanphong.userservice.exception.ErrorCode;
 import com.tranxuanphong.userservice.mapper.UserMapper;
-import com.tranxuanphong.userservice.repository.httpclient.ProductClient;
+import com.tranxuanphong.userservice.repository.httpclient.CartClient;
+import com.tranxuanphong.userservice.repository.httpclient.EmailClient;
 import com.tranxuanphong.userservice.repository.mongo.RoleRepository;
 import com.tranxuanphong.userservice.repository.mongo.UserRepository;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
+// import lombok.extern.slf4j.Slf4j;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @AllArgsConstructor
-@Slf4j
+// @Slf4j
 public class UserService {
 
   UserRepository userRepository;
+
   UserMapper userMapper;
   PasswordEncoder passwordEncoder;
   RoleRepository roleRepository;
   AuthenticationService authenticationService;
 
-  ProductClient productClient;
+  CartClient cartClient;
+  EmailClient emailClient;
 
   public UserResponse register(RegisterRequest request){
 
@@ -65,11 +68,64 @@ public class UserService {
     roles.add(userRole);
     user.setRoles(roles);
     user.setUsername(request.getEmail());
-    
+
+    user.setIsVerify(false);
+
+    System.out.println("yes 00");
+    // create cart 
+    userRepository.save(user);
+
+    Set<String> roless = roles.stream()
+    .map(Role::getName)
+    .collect(Collectors.toSet());
+
+    try {
+      String accessToken = authenticationService.generateAccessToken(user.getEmail(), roless, user.getId());
+      String authorization = "Bearer " + accessToken;
+      ApiResponse<CartResponse> cartResponse = cartClient.create(authorization);
+      
+    } catch (Exception e) {
+      System.out.println("cart service error: " + e.getMessage());
+    }
+
+    // add shipping voucher 
+
+    // add peter voucher
+
+    System.out.println("yes 01");
+    // send email
+    String to = request.getEmail();
+    String subject = "Active your account";
+    String htmlBody = "<span>Nhấn vào đây để kích hoạt tài khoản</span> "
+    + "<span> <a href='http://localhost:8889/api/users/verify/id/" 
+    + user.getId() 
+    + "'>Đây</a> </span>";
+
+    EmailRequest req = EmailRequest.builder()
+      .to(to)
+      .subject(subject)
+      .htmlBody(htmlBody)
+      .build();
+
+    try {
+      
+      emailClient.sendEmail(req);
+    } catch (Exception e) {
+      System.out.println("error: " +e.getMessage());
+    }
+
+    System.out.println("yes 02");
+
     return userMapper.toUserResponse(userRepository.save(user));
   }
 
-  public UserResponse updatePassword(UserUpdatePasswordRequest request){
+  public void verifyUserById(String userId){
+    User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+    user.setIsVerify(true);
+    userRepository.save(user);
+  }
+
+  public UserResponse update(UserUpdateRequest request){
     String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
     User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED)); 
     System.out.println("email: " + email);
@@ -80,8 +136,11 @@ public class UserService {
     if(request.getUsername() != null && !userRepository.existsByUsername(request.getUsername())){
       user.setUsername(request.getUsername());
     }
+    System.out.println("avatar: " + request.getAvatar());
+    if(request.getAvatar() != null){
+      user.setAvatar(request.getAvatar());
+    }
 
-    System.out.println("user name: " + request.getUsername());
 
     return userMapper.toUserResponse(userRepository.save(user));
   }
@@ -91,19 +150,15 @@ public class UserService {
     return userMapper.toUserResponse(userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED)));
   }
 
-  @PreAuthorize("hasRole('ROLE_ADMIN')")
-  public List<UserResponse> getAll(){
-    var authentication = SecurityContextHolder.getContext().getAuthentication(); 
-    log.info("getUsers authentication: {}, username: {}", authentication, authentication.getName()); 
-    authentication.getAuthorities().forEach(grantedAuthority -> log.info("grantedAuthority: {}", grantedAuthority.getAuthority())); 
-    
-    List<User> listUser = userRepository.findAll();
-    return userMapper.toListUserResponse(listUser);
-  }
-
   public LoginResponse login(LoginRequest request) {
+    // System.out.println("email: " + request.getEmail()  + " password: " + request.getPassword());
+
     User user = userRepository.findByEmail(request.getEmail())
             .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED));
+
+    if(user.getIsVerify() == false){
+      throw new AppException(ErrorCode.EMAIL_NOT_VERIFY);
+    }
 
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
     boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
@@ -128,19 +183,11 @@ public class UserService {
             .username(user.getUsername())
             .roles(user.getRoles())
             .addressId(user.getAddressId())
+            .avatar(user.getAvatar())
+            .peterVoucher(user.getPeterVoucher())
+            .shippingVoucher(user.getShippingVoucher())
             .build();
   }
-
-  public UserResponse updateRole(String roleId){
-    String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
-    User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED)); 
-    Set<Role> roles = user.getRoles();
-    Role role = roleRepository.findById(roleId).orElseThrow(()-> new AppException(ErrorCode.ROLE_NOT_FOUND));
-    roles.add(role);
-    user.setRoles(roles);
-    return userMapper.toUserResponse(userRepository.save(user));
-  }
-
 
   // product
   public boolean checkId(String id){
@@ -167,71 +214,6 @@ public class UserService {
     return user.getUsername();
   }
 
-  @PreAuthorize("hasRole('ROLE_ADMIN')")
-  public void adminUpdateAllUser(){
-    List<User> list = userRepository.findAll();
-    for(User user : list){
-      user.setFollower(null);
-      user.setFollowing(null);
-      user.setRating(null);
-      user.setAvatar("");
-
-      userRepository.save(user);
-    }
-  }
-
-  public SellerInfoResponse getSellerInfo(String sellerId){
-    User user = userRepository.findById(sellerId).orElseThrow(()->new AppException(ErrorCode.UNAUTHENTICATED));
-  
-    int countProduct = 0;
-
-    try {
-      countProduct = productClient.countProductBySellerId(sellerId);
-    } catch (Exception e) {
-      System.out.println("count product error: " + e.getMessage());
-    }
-
-    int follower = user.getFollower().size();
-    int following = user.getFollowing().size();
-
-    Map<Integer, Long> rating = user.getRating();
-
-    int countRating = 0;
-
-    double star = 0;
-    long totalCount = 0;
-    long weightedSum = 0;
-
-    for (Map.Entry<Integer, Long> entry : rating.entrySet()) {
-      int key = entry.getKey();     
-      long value = entry.getValue(); 
-
-      countRating += (int)value;
-
-      weightedSum += key * value;
-      totalCount += value;
-    }
-
-    if (totalCount > 0) {
-      star = (double) weightedSum / totalCount;
-    }
-  
-
-    SellerInfoResponse sellerInfoResponse = SellerInfoResponse.builder()
-    .sellerId(sellerId)
-    .sellerUsername(user.getUsername())
-    .createdAt(user.getCreatedAt())
-    .countProduct(countProduct)
-    .follower(follower)
-    .following(following)
-    .rating(countRating)
-    .star(star)
-    .avatar(user.getAvatar())
-    .build();
-
-    return sellerInfoResponse;
-  }
-
   @PreAuthorize("hasRole('ROLE_USER')")
   public UserResponse updateRatingBySellerId(int star, String sellerId){
     User user = userRepository.findById(sellerId).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
@@ -242,4 +224,32 @@ public class UserService {
 
     return userMapper.toUserResponse(userRepository.save(user));
   }
+
+  public String userAvatar(String id){
+    User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+    return user.getAvatar();
+  }
+
+  public void updateUserPeterVoucher(String userId, String peterVoucherId) {
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+
+    Map<String, Integer> userPeterVoucher = user.getPeterVoucher();
+
+    if (userPeterVoucher == null || !userPeterVoucher.containsKey(peterVoucherId)) {
+        throw new AppException(ErrorCode.VOUCHER_NOT_FOUND); 
+    }
+
+    Integer currentCount = userPeterVoucher.get(peterVoucherId);
+    if (currentCount == null || currentCount <= 0) {
+        throw new AppException(ErrorCode.VOUCHER_ALREADY_USED); 
+    }
+
+    userPeterVoucher.put(peterVoucherId, currentCount - 1);
+
+    user.setPeterVoucher(userPeterVoucher);
+    userRepository.save(user);
+  }
+
+
 }

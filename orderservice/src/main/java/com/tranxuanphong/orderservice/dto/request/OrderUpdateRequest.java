@@ -7,5 +7,5 @@ import lombok.Getter;
 @Getter
 public class OrderUpdateRequest {
   OrderStatus orderStatus;
-
+  String recieveImage;
 }

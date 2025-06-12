@@ -36,7 +36,11 @@ public class Order {
   @Builder.Default
   Set<Status> orderStatus = new HashSet<>();
   
-  String shippingId; // gia cuoc van chuyen -> tao moi ben peterservice, shippingPrice entity
+  String shippingId; 
+
+  String recieveImage;
+
+  String shipperId;
 
   String shippingVoucherId;
 

@@ -11,4 +11,10 @@ public interface PeterClient {
   @GetMapping(value = "/api/petercategories/exists-by-id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   boolean existsInPeterCategoryId(@PathVariable String id);
 
+  @GetMapping(value = "/api/flashsales/get/discount/flashsale/id/{flashsaleid}/product/id/{productid}", produces = MediaType.APPLICATION_JSON_VALUE)
+  Long getDiscountByFlashSaleIdAndProductId(@PathVariable String flashsaleid, @PathVariable String productid);
+
+  @GetMapping(value = "/api/flashsales/get/flashsale/id/latest", produces = MediaType.APPLICATION_JSON_VALUE)
+  String getLastestFlashSalesId();
+
 }

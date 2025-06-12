@@ -20,6 +20,7 @@ import com.tranxuanphong.cartservice.entity.Seller;
 import com.tranxuanphong.cartservice.exception.AppException;
 import com.tranxuanphong.cartservice.exception.ErrorCode;
 import com.tranxuanphong.cartservice.repository.CartRepository;
+import com.tranxuanphong.cartservice.repository.httpclient.PeterClient;
 import com.tranxuanphong.cartservice.repository.httpclient.ProductClient;
 import com.tranxuanphong.cartservice.repository.httpclient.UserClient;
 
@@ -39,6 +40,7 @@ public class CartService {
 
   UserClient userClient;
   ProductClient productClient;
+  PeterClient peterClient;
 
   
   @PreAuthorize("hasRole('ROLE_USER')")
@@ -88,8 +90,23 @@ public class CartService {
     
         ItemResponse cartProduct = productClient.getProductByVariantId(cartItem.getVariantId());
 
+        String latestFlashsaleId = "";
+        try {
+          latestFlashsaleId = peterClient.getLastestFlashSalesId();
+        } catch (Exception e) {
+          System.out.println("error: " + e.getMessage());
+        }
+
+        Long discount = 0L;
+        try {
+          discount = peterClient.getDiscountByFlashSaleIdAndProductId(latestFlashsaleId, cartProduct.getProductId());
+        } catch (Exception e) {
+          System.out.println("error: " + e.getMessage());
+        }
+
         cartProduct.setQuantity(cartItem.getQuantity());
         cartProduct.setUpdatedAt(cartItem.getUpdatedAt());
+        cartProduct.setDiscount(discount);
 
         itemResponse.add(cartProduct);
       }
@@ -161,8 +178,23 @@ public class CartService {
         ItemResponse itemResponse = productClient.getProductByVariantId(item.getVariantId());
         itemResponse.setQuantity(item.getQuantity());      
         itemResponse.setUpdatedAt(item.getUpdatedAt());
-        itemResponses.add(itemResponse);
 
+        String latestFlashsaleId = "";
+        try {
+          latestFlashsaleId = peterClient.getLastestFlashSalesId();
+        } catch (Exception e) {
+          System.out.println("error: " + e.getMessage());
+        }
+
+        Long discount = 0L;
+        try {
+          discount = peterClient.getDiscountByFlashSaleIdAndProductId(latestFlashsaleId, itemResponse.getProductId());
+        } catch (Exception e) {
+          System.out.println("error: " + e.getMessage());
+        }
+        itemResponse.setDiscount(discount);
+
+        itemResponses.add(itemResponse);
       }
 
 
@@ -208,8 +240,25 @@ public class CartService {
             Set<ItemResponse> itemResponses = sellerResponse.getItemResponses();
 
             ItemResponse itemResponse = productClient.getProductByVariantId(request.getVariantId());
+            
             itemResponse.setQuantity(request.getQuantity());      
             itemResponse.setUpdatedAt(Instant.now());
+
+            String latestFlashsaleId = "";
+            try {
+              latestFlashsaleId = peterClient.getLastestFlashSalesId();
+            } catch (Exception e) {
+              System.out.println("error: " + e.getMessage());
+            }
+
+            Long discount = 0L;
+            try {
+              discount = peterClient.getDiscountByFlashSaleIdAndProductId(latestFlashsaleId, itemResponse.getProductId());
+            } catch (Exception e) {
+              System.out.println("error: " + e.getMessage());
+            }
+            itemResponse.setDiscount(discount);
+
             itemResponses.add(itemResponse);
 
             sellerResponse.setItemResponses(itemResponses);
@@ -249,9 +298,24 @@ public class CartService {
         ItemResponse itemResponseApi = productClient.getProductByVariantId(request.getVariantId());
         itemResponseApi.setQuantity(request.getQuantity());
         itemResponseApi.setUpdatedAt(Instant.now());
+
+        String latestFlashsaleId = "";
+        try {
+          latestFlashsaleId = peterClient.getLastestFlashSalesId();
+        } catch (Exception e) {
+          System.out.println("error: " + e.getMessage());
+        }
+
+        Long discount = 0L;
+        try {
+          discount = peterClient.getDiscountByFlashSaleIdAndProductId(latestFlashsaleId, itemResponseApi.getProductId());
+        } catch (Exception e) {
+          System.out.println("error: " + e.getMessage());
+        }
+        itemResponseApi.setDiscount(discount);
+
         itemResponses.add(itemResponseApi);
   
-
         SellerResponse sellerResponse = SellerResponse.builder()
         .sellerId(request.getSellerId())
         .sellerUsername(sellerUsername)

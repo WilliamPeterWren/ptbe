@@ -1,7 +1,5 @@
 package com.tranxuanphong.peterservice.entity;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.springframework.data.annotation.Id;
 
@@ -29,10 +27,11 @@ public class Shipping {
 
   String name;
   Long value;
+
   String slug;
 
   @Builder.Default
-  boolean available = true;
+  Boolean available = true;
 
   @Builder.Default
   Instant createdAt = Instant.now();

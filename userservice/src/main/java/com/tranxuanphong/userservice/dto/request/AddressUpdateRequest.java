@@ -8,10 +8,8 @@ import lombok.Getter;
 public class AddressUpdateRequest {
   String firstName;
   String lastName;
-
   LocalDate dob;
-
   String address;
-
   String phone;
+  Boolean gender;
 }

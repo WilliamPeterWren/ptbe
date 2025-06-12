@@ -29,7 +29,8 @@ public class SecurityConfig {
     "/api/products/set/product/images/id/{id}",
     "/api/products/get/products/by/ids",
 
-    "/api/products/update/views/slug/{slug}"
+    "/api/products/update/views/slug/{slug}",
+    "/api/reviews/check/reviews/user/product/variant",
 
   };
 
@@ -52,6 +53,7 @@ public class SecurityConfig {
     "/api/products/get/cartproduct/variant/id/{id}",
     "/api/products/count/seller/{sellerId}",
     "/api/products/rand/seller/id/{sellerId}/limit/{limit}",
+    "/api/products/seller/id/{sellerId}/category/id/{categoryId}",
     
     "/api/products/check/product/{productId}/seller/{sellerId}",
     "/api/products/check/variant/id/{id}",
@@ -59,6 +61,8 @@ public class SecurityConfig {
     "/api/products/search/product/productname/{productname}",
 
     "/api/reviews/get/reviews/product/id/{id}",
+    "/api/products/get/seller/id/product/id/{id}",
+    "/api/products/product/id/{id}",
   };
 
   // private String signerKey = "WjG25z4tA+dZX3clK+u0/kRg1tCdV6vvaizOfsJLgy4HFasdkfwxKso+KlGArOm4uOdkai";

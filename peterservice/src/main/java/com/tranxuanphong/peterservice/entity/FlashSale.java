@@ -31,6 +31,9 @@ public class FlashSale {
   String slug;
 
   @Builder.Default
+  Boolean available = true;
+
+  @Builder.Default
   Set<FlashSaleItem> flashSaleItems = new HashSet<>();
   Instant startedAt;
   Instant expiredAt;

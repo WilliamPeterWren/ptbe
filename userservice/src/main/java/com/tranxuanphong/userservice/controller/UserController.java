@@ -7,7 +7,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,14 +17,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.tranxuanphong.userservice.dto.request.LoginRequest;
 import com.tranxuanphong.userservice.dto.request.RegisterRequest;
-import com.tranxuanphong.userservice.dto.request.UserUpdatePasswordRequest;
+import com.tranxuanphong.userservice.dto.request.UserUpdateRequest;
 import com.tranxuanphong.userservice.dto.response.ApiResponse;
 import com.tranxuanphong.userservice.dto.response.LoginResponse;
-import com.tranxuanphong.userservice.dto.response.SellerInfoResponse;
 import com.tranxuanphong.userservice.dto.response.UserResponse;
 import com.tranxuanphong.userservice.service.UserService;
 
 import jakarta.validation.Valid;
+
 
 
 @RestController
@@ -43,9 +42,9 @@ public class UserController {
   }
   
   @PutMapping
-  public ApiResponse<UserResponse> updatePassword(@RequestBody UserUpdatePasswordRequest request){
+  public ApiResponse<UserResponse> update(@RequestBody UserUpdateRequest request){
     return ApiResponse.<UserResponse>builder()
-    .result(userService.updatePassword(request))
+    .result(userService.update(request))
     .build();
   }
 
@@ -56,24 +55,12 @@ public class UserController {
     .build();
   }
 
-  @GetMapping("/get-all")
-  public ApiResponse<List<UserResponse>> getAll(){
-    return ApiResponse.<List<UserResponse>>builder()
-    .result(userService.getAll())
-    .build();
-  }
+
 
   @PostMapping("/login")
   public ApiResponse<LoginResponse> login(@RequestBody @Valid LoginRequest request){
     return ApiResponse.<LoginResponse>builder()
     .result(userService.login(request))
-    .build();
-  }
-
-  @PutMapping("/update-role/{roleId}")
-  public ApiResponse<UserResponse> updateRole(@PathVariable String roleId) {
-    return ApiResponse.<UserResponse>builder()
-    .result(userService.updateRole(roleId))
     .build();
   }
 
@@ -92,7 +79,6 @@ public class UserController {
 
   @GetMapping("/get/userid/email/{email}")
   public String getUserId(@PathVariable String email){
-    System.out.println("email: " + email);
     return userService.getUserId(email);
   }
 
@@ -106,20 +92,27 @@ public class UserController {
     return userService.getUsernameById(id);
   }
 
-  @GetMapping("/admin/update/all")
-  public void adminUpdateAllUser(){
-    userService.adminUpdateAllUser();
-  }
-
-  @GetMapping("/get/seller/info/id/{sellerId}")
-  public SellerInfoResponse getSellerInfoResponse(@PathVariable String sellerId){
-    return userService.getSellerInfo(sellerId);
-  }
 
   @PostMapping("/update/rating/star/{star}/seller/id/{sellerId}")
   public UserResponse updateRatingBySellerId(@PathVariable int star, @PathVariable String sellerId){
     return userService.updateRatingBySellerId(star, sellerId);
   }
 
+  @GetMapping("/get/avatar/user/id/{id}")
+  public String userAvatar(@PathVariable String id) {
+    return userService.userAvatar(id);
+  }
+
+  @GetMapping("/verify/id/{id}")
+  public void verifyUserById(@PathVariable String id) {     
+      userService.verifyUserById(id);
+  }
+  
+
+  @PostMapping("/update/petervoucher/id/{petervoucherid}/user/id/{userid}")
+  public void updateUserPeterVoucher(@PathVariable String petervoucherid, @PathVariable String userid) {
+    userService.updateUserPeterVoucher(userid, petervoucherid);
+  }
+  
 
 }

@@ -13,7 +13,6 @@ import com.tranxuanphong.productservice.exception.AppException;
 import com.tranxuanphong.productservice.exception.ErrorCode;
 import com.tranxuanphong.productservice.mapper.CategoryMapper;
 import com.tranxuanphong.productservice.repository.httpclient.PeterClient;
-// import com.tranxuanphong.productservice.repository.elasticsearch.CategoryElasticsearchRepository;
 import com.tranxuanphong.productservice.repository.httpclient.UserClient;
 import com.tranxuanphong.productservice.repository.mongo.CategoryRepository;
 import com.tranxuanphong.productservice.repository.mongo.ProductRepository;
@@ -95,7 +94,24 @@ public class CategoryService {
 
     Category category = categoryRepository.findBySlug(slug).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTS));
     categoryMapper.updateCategory(category, request);
-    return categoryMapper.toCategoryResponse(category);
+    return categoryMapper.toCategoryResponse(categoryRepository.save(category));
+  }
+
+  @PreAuthorize("hasRole('ROLE_SELLER')")
+  public CategoryResponse updateById(String id, CategoryUpdateRequest request){
+    String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
+    String sellerId = userClient.userId(email);
+
+    List<Category> categories = categoryRepository.findBySellerId(sellerId);
+    for(Category c: categories){
+      if(c.getCategoryName().equals(request.getCategoryName())){
+        throw new AppException(ErrorCode.CATEGORY_EXISTS);
+      }
+    }
+
+    Category category = categoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTS));
+    categoryMapper.updateCategory(category, request);
+    return categoryMapper.toCategoryResponse(categoryRepository.save(category));
   }
 
   @PreAuthorize("hasRole('ROLE_SELLER')")

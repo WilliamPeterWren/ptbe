@@ -30,6 +30,7 @@ public class SecurityConfig {
     "/api/auth/token", 
     "/api/auth/introspect",
     "/api/users/login",
+    "/api/users/update/petervoucher/id/{petervoucherid}/user/id/{userid}"
   };
 
   private final String[] PUBLIC_ENDPOINTS_GET = {
@@ -38,7 +39,10 @@ public class SecurityConfig {
     "/api/users/get/userid/email/{email}",    
     "/api/users/get/username/email/{email}",
     "/api/users/get/username/id/{id}",
-    "/api/users/get/seller/info/id/{sellerId}"
+    "/api/users/seller/get/seller/info/id/{sellerId}",
+    "/api/users/get/avatar/user/id/{id}",
+    "/api/users/verify/id/{id}"
+
 
     // "/api/addresses/**",
   };

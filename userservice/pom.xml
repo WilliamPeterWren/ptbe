@@ -86,7 +86,7 @@
 			<version>${mapstruct.version}</version> 
 		</dependency> 
 
-		<!-- ByCrypt -->
+		<!-- BCrypt -->
 		<dependency> 
 			<groupId>org.springframework.security</groupId> 
 			<artifactId>spring-security-crypto</artifactId> 
@@ -106,7 +106,7 @@
 			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId> 
 		</dependency> 
 
-<!--		eureka server -->
+		<!--eureka server -->
 		<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>

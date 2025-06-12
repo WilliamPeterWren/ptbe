@@ -22,6 +22,11 @@ public class ShippingController {
         return ResponseEntity.ok(shippingService.getAllShippings());
     }
 
+    @GetMapping("/admin")
+    public ResponseEntity<List<Shipping>> adminGetAllShippings() {
+        return ResponseEntity.ok(shippingService.adminGetAllShippings());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Shipping> getShippingById(@PathVariable String id) {
         return shippingService.getShippingById(id)
@@ -40,10 +45,9 @@ public class ShippingController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Shipping> updateShipping(@PathVariable String id, @RequestBody Shipping shipping) {
-        return shippingService.updateShipping(id, shipping)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public Shipping updateShipping(@PathVariable String id, @RequestBody Shipping shipping) {
+        System.out.println("controller.....");
+        return shippingService.updateShipping(id, shipping);
     }
 
     @DeleteMapping("/{id}")

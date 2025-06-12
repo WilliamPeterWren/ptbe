@@ -41,6 +41,11 @@ spring:
           predicates:
            - Path=/api/files/**,/images/**
 
+        - id: emailservice
+          uri: lb://emailservice
+          predicates:
+            - Path=/api/email/**
+
         - id: peterservice
           uri: lb://peterservice
           predicates:

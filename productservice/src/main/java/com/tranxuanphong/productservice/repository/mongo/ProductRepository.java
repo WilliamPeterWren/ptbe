@@ -39,5 +39,10 @@ public interface ProductRepository extends MongoRepository<Product, String>, Cus
   // Page<Product> findByProductName(String productName, Pageable pageable);
   @Query("{ $text: { $search: ?0 } }")
   Page<Product> findByProductName(String productName, Pageable pageable);
+
+  @Query("{ $text: { $search: ?0 } }")
+  Page<Product> findByProductNameAndSellerId(String productName, String sellerId, Pageable pageable);
+
+  Page<Product> findBySellerIdAndCategoryId(String sellerId, String categoryId, Pageable pageable);
 }
 

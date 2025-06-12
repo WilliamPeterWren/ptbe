@@ -30,4 +30,7 @@ public interface UserClient {
 
   @PostMapping("/api/users/update/rating/star/{star}/seller/id/{sellerId}")
   UserResponse updateRatingBySellerId(@PathVariable int star, @PathVariable String sellerId, @RequestHeader("Authorization") String authorizationHeader);
+
+  @GetMapping("/api/users/get/avatar/user/id/{id}")
+  public String userAvatar(@PathVariable String id);
 }

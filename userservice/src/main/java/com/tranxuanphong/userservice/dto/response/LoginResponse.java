@@ -1,5 +1,6 @@
 package com.tranxuanphong.userservice.dto.response;
 
+import java.util.Map;
 import java.util.Set;
 
 import com.tranxuanphong.userservice.entity.Role;
@@ -20,4 +21,7 @@ public class LoginResponse {
   String username;
   Set<Role> roles;
   String addressId;
+  String avatar;
+  Map<String, Integer> peterVoucher;
+  Map<String, Integer> shippingVoucher;
 }

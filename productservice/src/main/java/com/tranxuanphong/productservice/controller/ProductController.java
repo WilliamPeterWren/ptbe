@@ -4,8 +4,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tranxuanphong.productservice.dto.request.ProductCreateRequest;
-import com.tranxuanphong.productservice.dto.request.ProductUpdateRequest;
 import com.tranxuanphong.productservice.dto.response.ApiResponse;
 import com.tranxuanphong.productservice.dto.response.CartProductResponse;
 import com.tranxuanphong.productservice.dto.response.FlashSaleProductResponse;
@@ -23,7 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -36,27 +33,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 public class ProductController {
   ProductService productService;
 
-
-  @PostMapping
-  public ApiResponse<ProductResponse> create(@RequestBody ProductCreateRequest request) {
-    return ApiResponse.<ProductResponse>builder()
-      .result(productService.create(request))
-      .build();
-  }
-
-  @GetMapping("/get-products")
-  public ApiResponse<Page<ProductResponse>> getProducts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-    return ApiResponse.<Page<ProductResponse>>builder()
-    .result(productService.getPaginatedProducts(page, size))
-    .build();
-  }
-
   @GetMapping("/slug/{slug}")
-  public ApiResponse<ProductResponse> getOneBySlug(@PathVariable String slug) {
+  public ApiResponse<ProductResponse> getOneBySlug(
+          @PathVariable String slug,
+          @RequestParam(required = false) String flashsaleId) {
+      
     return ApiResponse.<ProductResponse>builder()
-    .result(productService.getOneBySlug(slug))
-    .build();
+              .result(productService.getOneBySlug(flashsaleId, slug))
+              .build();
   }
+  
 
   @GetMapping("/id/{id}")
   public ApiResponse<ProductResponse> getOne(@PathVariable String id) {
@@ -65,18 +51,9 @@ public class ProductController {
     .build();
   }
 
-  @PutMapping("/{id}")
-  public ApiResponse<ProductResponse> updateById(@PathVariable String id, @RequestBody ProductUpdateRequest request) {
-    return ApiResponse.<ProductResponse>builder()
-    .result(productService.updateById(id, request))
-    .build();
-  }
-  
-  @DeleteMapping("/{id}")
-  public ApiResponse<ProductResponse> delete(@PathVariable String id){
-    return ApiResponse.<ProductResponse>builder()
-    .result(productService.delete(id))
-    .build();
+  @GetMapping("/product/id/{id}")
+  public ProductResponse getProductResponseByProductId(@PathVariable String id) {
+    return productService.getOneById(id);
   }
 
   @GetMapping("/check/product/id/{id}")
@@ -91,6 +68,7 @@ public class ProductController {
 
   @GetMapping("/get-products/seller/{sellerId}")
   public ApiResponse<Page<ProductResponse>> getProductsBySeller(@PathVariable String sellerId, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    System.out.println("controller");
     return ApiResponse.<Page<ProductResponse>>builder()
     .result(productService.getPaginatedProductsBySellerId(sellerId, page, size))
     .build();
@@ -110,11 +88,6 @@ public class ProductController {
   public List<String> getProductImageMetadata(@PathVariable String id) {
     return productService.getProductImageMetadata(id);
   }
-
-  @PostMapping("/set/product/images/id/{id}")
-  public void setProductImageMetadata(@PathVariable String id, @RequestBody List<String> fileNames) {
-    productService.saveProductImageMetadata(id, fileNames);
-  }
   
   @PostMapping("/get/products/by/ids")
   public List<FlashSaleProductResponse> getProductImageMetadata(@RequestBody List<String> ids) {
@@ -131,51 +104,23 @@ public class ProductController {
     return productService.getProductByPeterCategory(peterCategoryId, page, size);
   }
 
-
   @GetMapping("/get/product/variant/id/{id}")
   public ProductResponse findProductByVariantId(@PathVariable String id) {
-    
     return productService.findProductByVariantId(id);
   }
 
   @GetMapping("/get/cartproduct/variant/id/{id}")
   public CartProductResponse getCartProductResponse(@PathVariable String id) {
-    System.out.println("id ..........." + id);
     return productService.cartProductResponse(id);
-  }
-
-  @DeleteMapping("/delete/admin/product")
-  public void deleteByAdmin(){
-    productService.deleteByAdmin();
-  }
-  
-
-  // @PostMapping("/update/all/shipping")
-  // public void postMethodName(@RequestBody String entity) {
-  //   productService.updateAllProductsWithDefaultAvailable();
-  // }
-
-  @PostMapping("/update/all/rating")
-  public void postMethodName() {
-    productService.updateAllProductsWithDefaultAvailable();
   }
 
   @GetMapping("/search/product/productname/{productname}")
   public Page<ProductResponse> searchProductByProductName(@PathVariable String productname,
                                                            @RequestParam(defaultValue = "0") int page,
                                                            @RequestParam(defaultValue = "10") int size) {
-        String decodedProductName = URLDecoder.decode(productname, StandardCharsets.UTF_8);
-        return productService.searchByProductName(decodedProductName, page, size);
-    }
-
-
-  @PutMapping("/id/{id}/sold/{sold}")
-  public ApiResponse<ProductResponse> updateSoldById(@PathVariable String id, @PathVariable Long sold) {
-    return ApiResponse.<ProductResponse>builder()
-    .result(productService.updateSoldById(id, sold))
-    .build();
+    String decodedProductName = URLDecoder.decode(productname, StandardCharsets.UTF_8);
+    return productService.searchByProductName(decodedProductName, page, size);
   }
-
 
   @PutMapping("/rating/{rating}/product/id/{id}")
   public ApiResponse<ProductResponse> updateRatingById(@PathVariable String id, @PathVariable Integer rating) {
@@ -204,6 +149,18 @@ public class ProductController {
     return ApiResponse.<List<ProductResponse>>builder()
     .result(productService.getRandomProductBySellerId(sellerId, limit))
     .build();
+  }
+  
+  @GetMapping("/seller/id/{sellerId}/category/id/{categoryId}")
+  public ApiResponse<Page<ProductResponse>> findBySellerIdAndCategoryId(@PathVariable String sellerId, @PathVariable String categoryId, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    return ApiResponse.<Page<ProductResponse>>builder()
+    .result(productService.findBySellerIdAndCategoryId(sellerId, categoryId, page, size))
+    .build();
+  }
+
+  @GetMapping("/get/seller/id/product/id/{id}")
+  public String getSellerIdByProductId(@PathVariable String id) {
+    return productService.getSellerIdByProductId(id);
   }
   
 }

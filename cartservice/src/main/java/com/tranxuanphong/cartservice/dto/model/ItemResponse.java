@@ -21,6 +21,7 @@ public class ItemResponse {
   String image;
   Long price;
   Long salePrice;
+  Long discount;
 
   
   @Builder.Default

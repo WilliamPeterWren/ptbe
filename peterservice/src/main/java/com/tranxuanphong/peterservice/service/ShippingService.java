@@ -11,19 +11,27 @@ import lombok.AllArgsConstructor;
 
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
+
 @Service
 @AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ShippingService {
 
-    private final ShippingRepository shippingRepository;
-    private final GenerateSlug generateSlug;
-
+    ShippingRepository shippingRepository;
+    GenerateSlug generateSlug;
 
 
     public List<Shipping> getAllShippings() {
+        return shippingRepository.findByAvailableTrue();
+    }
+
+    public List<Shipping> adminGetAllShippings() {
         return shippingRepository.findAll();
     }
 
@@ -48,19 +56,43 @@ public class ShippingService {
         return shippingRepository.save(temp);
     }
 
-    public Optional<Shipping> updateShipping(String id, Shipping updatedShipping) {
-        return shippingRepository.findById(id).map(existing -> {
-            existing.setName(updatedShipping.getName());
-            existing.setValue(updatedShipping.getValue());
-            existing.setSlug(updatedShipping.getSlug());
-            existing.setAvailable(updatedShipping.isAvailable());
-            existing.setUpdatedAt(java.time.Instant.now());
-            return shippingRepository.save(existing);
-        });
+    public Shipping updateShipping(String id, Shipping updatedShipping) {
+        Shipping shipping = shippingRepository.findById(id).orElseThrow(()->new AppException(ErrorCode.SHIPPING_INVALID));
+        System.out.println("herrrrrrrrrrrrrrrrrr");
+        // log.info("id: " + id);
+        boolean checkUpdate = false;
+        if(updatedShipping.getName() !=null ){
+            shipping.setName(updatedShipping.getName());
+            String slug = generateSlug.generateSlug(shipping.getName());
+            shipping.setSlug(slug);
+            checkUpdate = true;
+        }
+
+        if(updatedShipping.getValue()!=null && updatedShipping.getValue() > 5000L){
+            shipping.setValue(updatedShipping.getValue());
+            checkUpdate = true;
+        }
+        System.out.println("avai: " + updatedShipping.getAvailable());
+        if(updatedShipping.getAvailable() != null){
+            
+            shipping.setAvailable(updatedShipping.getAvailable());
+            checkUpdate = true;
+        }
+
+        if(checkUpdate){
+            shipping.setUpdatedAt(Instant.now());
+        }
+        
+        return shippingRepository.save(shipping);
+        
     }
 
     public void deleteShipping(String id) {
-        shippingRepository.deleteById(id);
+        Shipping shipping = shippingRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.SHIPPING_INVALID));
+
+        shipping.setAvailable(false);
+        shipping.setUpdatedAt(Instant.now());
+        shippingRepository.save(shipping);
     }
 }
 

@@ -1,7 +1,6 @@
 package com.tranxuanphong.peterservice.dto.response;
 
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.Set;
 
 import com.tranxuanphong.peterservice.entity.FlashSaleItem;
@@ -15,6 +14,8 @@ public class FlashSaleResponse {
   String id;
   String name;
   String slug;
+
+  Boolean available;
 
   Set<FlashSaleItem> flashSaleItems;
   Instant startedAt;

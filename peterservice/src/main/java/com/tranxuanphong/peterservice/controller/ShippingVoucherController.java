@@ -20,6 +20,11 @@ public class ShippingVoucherController {
         return ResponseEntity.ok(service.getAll());
     }
 
+    @GetMapping("/user/getall")
+    public ResponseEntity<List<ShippingVoucher>> userGetAll() {
+        return ResponseEntity.ok(service.userGetAll());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ShippingVoucher> getById(@PathVariable String id) {
         return service.getById(id)
@@ -32,20 +37,25 @@ public class ShippingVoucherController {
         return service.getByIdd(id);
     }
 
-    @PostMapping
-    public ResponseEntity<ShippingVoucher> create(@RequestBody ShippingVoucher voucher) {
-        return ResponseEntity.ok(service.create(voucher));
+    @PostMapping("/count/{count}")
+    public ResponseEntity<ShippingVoucher> create(@RequestBody ShippingVoucher voucher, @PathVariable int count) {
+        return ResponseEntity.ok(service.create(voucher, count));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ShippingVoucher> update(@PathVariable String id, @RequestBody ShippingVoucher voucher) {
-        return ResponseEntity.ok(service.update(id, voucher));
+    @PutMapping("/{id}/count/{count}")
+    public ResponseEntity<ShippingVoucher> update(@PathVariable String id, @PathVariable int count, @RequestBody ShippingVoucher voucher) {
+        return ResponseEntity.ok(service.update(id, count, voucher));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/admin/update/all")
+    public void adminUpdateAll(){
+        service.adminUpdateAll();
     }
 }
 

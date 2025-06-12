@@ -16,4 +16,6 @@ public interface ReviewRepository extends MongoRepository<Review, String> {
   Page<Review> findByProductIdOrderByUpdatedAtDesc(String productId, Pageable pageable);
   
   List<Review> findByProductIdOrderByUpdatedAtDesc(String productId);
+
+  boolean existsByUserIdAndProductIdAndVariantIdAndOrderId(String userId, String productId, String variantId, String orderId);
 }

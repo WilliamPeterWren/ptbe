@@ -1,7 +1,7 @@
 package com.tranxuanphong.productservice.service;
 
 
-import com.tranxuanphong.productservice.configuration.SecurityConfig;
+import com.tranxuanphong.productservice.dto.request.ReviewCheckRequest;
 import com.tranxuanphong.productservice.dto.response.ReviewResponse;
 import com.tranxuanphong.productservice.dto.response.UserResponse;
 import com.tranxuanphong.productservice.entity.Product;
@@ -59,14 +59,14 @@ public class ReviewService {
         String authorizationHeader = "Bearer " + authToken;
 
         Product product = productRepository.findById(review.getProductId()).orElseThrow(() -> new AppException(ErrorCode.PRODUCTID_INVALID));
-        System.out.println("commet ok");
         Map<Integer, Long> rating = product.getRating();
         int star = review.getStar();
         rating.put(star, rating.getOrDefault(star, 0L) + 1);
         product.setRating(rating);
-System.out.println("this ok");
+        productRepository.save(product);
+
         UserResponse userResponse = userClient.updateRatingBySellerId(star, product.getSellerId(), authorizationHeader);
-System.out.println("user respons ok");
+        System.out.println("rating by: "+userResponse.getEmail());
         return reviewRepository.save(review);
     }
 
@@ -80,9 +80,22 @@ System.out.println("user respons ok");
         for (Review review : reviewPage.getContent()) {
             ReviewResponse reviewResponse = modelMapper.map(review, ReviewResponse.class);
             
-            String username = userClient.usernameByUserId(review.getUserId());
+            String username = "";
+            try {
+                username = userClient.usernameByUserId(review.getUserId());                
+            } catch (Exception e) {
+                System.out.println("Error: "+e.getMessage());
+            }
+
+            String avatar = ""; 
+            try {                
+                avatar = userClient.userAvatar(review.getUserId());
+            } catch (Exception e) {
+                System.out.println("Error getting user avatar: " + e.getMessage());
+            }
             
             reviewResponse.setUsername(username);
+            reviewResponse.setAvatar(avatar);
 
             reviewResponseList.add(reviewResponse);
         } 
@@ -119,6 +132,9 @@ System.out.println("user respons ok");
         reviewRepository.deleteById(id);
     }
 
+    public boolean checkReviewByUserProductVariant(ReviewCheckRequest request){
+        return reviewRepository.existsByUserIdAndProductIdAndVariantIdAndOrderId(request.getUserId(), request.getProductId(), request.getVariantId(), request.getOrderId());
+    }
 
 }
 

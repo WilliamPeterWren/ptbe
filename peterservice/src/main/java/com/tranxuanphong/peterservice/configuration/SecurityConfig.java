@@ -36,7 +36,11 @@ public class SecurityConfig {
     "/api/product-vouchers/**",
     "/api/seller-vouchers/**",
     "/api/shipping-vouchers/**",
-    "/api/shippings/**"
+    "/api/shippings/**",
+    "/api/vouchers",
+    "/api/vouchers/{id}",
+    "/api/vouchers/id/{id}",
+    "/api/flashsales/get/discount/flashsale/id/{flashsaleid}/product/id/{productid}",
   };
 
   // private String signerKey = "WjG25z4tA+dZX3clK+u0/kRg1tCdV6vvaizOfsJLgy4HFasdkfwxKso+KlGArOm4uOdkai";

@@ -11,6 +11,7 @@ public class ReviewResponse {
   String id;
 
   String username;
+  String avatar;
   String productId;
   String variantId;
   String comment;

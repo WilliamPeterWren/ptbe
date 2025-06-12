@@ -9,4 +9,5 @@ public class FlashSaleUpdateRequest {
   String name;
   Instant startedAt;
   Instant expiredAt;
+  Boolean available;
 }

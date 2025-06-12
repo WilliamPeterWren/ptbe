@@ -35,6 +35,9 @@ public enum ErrorCode {
   INVALID_PHONE(1017,"Phone must be 10 characters", HttpStatus.BAD_REQUEST),
   CATEGORY_EXISTS(1018,"category exists",HttpStatus.BAD_REQUEST ),
   USER_ADDRESS_NOT_MATCH(1018,"USER address conflic",HttpStatus.BAD_REQUEST ),
+  EMAIL_NOT_VERIFY(1018,"user is not verified",HttpStatus.BAD_REQUEST ),
+  VOUCHER_NOT_FOUND(1018,"voucher not found",HttpStatus.NOT_FOUND ),
+  VOUCHER_ALREADY_USED(1018,"voucher not found",HttpStatus.BAD_REQUEST ),
   ; 
 
   int code; 

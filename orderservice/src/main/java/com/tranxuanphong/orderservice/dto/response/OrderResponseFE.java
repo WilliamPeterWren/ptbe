@@ -1,7 +1,6 @@
 package com.tranxuanphong.orderservice.dto.response;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.Set;
 
 import com.tranxuanphong.orderservice.entity.Status;
@@ -18,11 +17,16 @@ import lombok.Data;
 public class OrderResponseFE {
   String id;
   String userId;
+  String username;
   String sellerId;
   String sellerUsername;
   Set<ItemResponse> items;
 
+  String recieveImage;
+  String shipperId;
+
   Long shippingPrice;
+  String shippingName;
   Long shippingVoucherPrice;
   String sellerVoucherId;
   Long peterVoucher;
@@ -32,4 +36,5 @@ public class OrderResponseFE {
   PaymentType paymentType;
   Instant createdAt;
   Instant updatedAt;
+
 }

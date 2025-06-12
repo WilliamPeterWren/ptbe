@@ -47,4 +47,11 @@ public class AddressController {
        .build();
    }
 
+   @GetMapping("/get/seller/order/address/id/{id}")
+   public String sellerGetAddress(@PathVariable String id){
+    return addressService.address(id);
+   }
+
+
+
 }

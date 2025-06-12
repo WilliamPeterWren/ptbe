@@ -44,6 +44,12 @@ public class User {
   
   @Builder.Default
   Map<Integer, Long> rating = new HashMap<>();
+
+  @Builder.Default
+  Map<String, Integer> peterVoucher = new HashMap<>();
+
+  @Builder.Default
+  Map<String, Integer> shippingVoucher = new HashMap<>();
   
   String avatar;
 

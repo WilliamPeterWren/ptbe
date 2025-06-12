@@ -73,7 +73,7 @@ public class Product {
     Long views = 0L;
 
     @Builder.Default
-    boolean isActive = true;
+    Boolean isActive = true;
 
     @Builder.Default
     Instant createdAt = Instant.now();

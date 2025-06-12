@@ -1,5 +1,6 @@
 package com.tranxuanphong.productservice.controller;
 
+import com.tranxuanphong.productservice.dto.request.ReviewCheckRequest;
 import com.tranxuanphong.productservice.dto.response.ProductResponse;
 import com.tranxuanphong.productservice.dto.response.ReviewResponse;
 import com.tranxuanphong.productservice.entity.Review;
@@ -18,6 +19,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 
 @RestController
@@ -64,4 +68,10 @@ public class ReviewController {
         return reviewService.getReviewByProductId(id, page, size);
 
     }
+
+    @PostMapping("/check/reviews/user/product/variant")
+    public boolean checkReviewByUserProductVariant(@RequestBody ReviewCheckRequest request) {
+        return reviewService.checkReviewByUserProductVariant(request);
+    }
+    
 }

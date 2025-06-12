@@ -22,4 +22,6 @@ public class ItemResponse {
   String productName;
   Long quantity;
   String image;
+
+  boolean alreadyReview;
 }

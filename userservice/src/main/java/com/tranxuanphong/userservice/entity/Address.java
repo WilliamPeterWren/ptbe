@@ -25,6 +25,5 @@ public class Address {
 
     String address;
 
-    @Indexed(unique = true)
     String phone;
 }

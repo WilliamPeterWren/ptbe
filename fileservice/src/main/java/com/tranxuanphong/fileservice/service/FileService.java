@@ -21,6 +21,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 public class FileService {
     String UPLOAD_DIR = System.getProperty("user.dir") + "/fileservice/src/main/resources/static/images/product";
+    String UPLOAD_DIR_REVIEW = System.getProperty("user.dir") + "/fileservice/src/main/resources/static/images/review";
+    String UPLOAD_DIR_AVATAR = System.getProperty("user.dir") + "/fileservice/src/main/resources/static/images/avatar";
+    String UPLOAD_DIR_ORDER = System.getProperty("user.dir") + "/fileservice/src/main/resources/static/images/order";
 
     ProductClient productClient;
 
@@ -56,10 +59,8 @@ public class FileService {
             throw new IllegalArgumentException("File list cannot be empty");
         }
 
-        // Step 1: Delete old images for the product
         deleteOldImages(productId);
 
-        // Step 2: Save new images
         List<String> fileNames = new ArrayList<>();
         for (MultipartFile file : files) {
             if (file.isEmpty()) {
@@ -69,7 +70,6 @@ public class FileService {
                 throw new IllegalArgumentException("File must be an image: " + file.getOriginalFilename());
             }
 
-            // Optionally prepend productId to ensure unique filenames
             String fileName = file.getOriginalFilename();
             Path filePath = Paths.get(UPLOAD_DIR, fileName);
 
@@ -79,15 +79,12 @@ public class FileService {
             fileNames.add(fileName);
         }
 
-        // Step 3: Save the new list of filenames (e.g., to a database or file)
         saveProductImageMetadata(productId, fileNames);
 
         return fileNames;
     }
 
-    // Delete old images for a product
     private void deleteOldImages(String productId) throws IOException {
-        // Retrieve the list of old image filenames for the product
         List<String> oldImageNames = getProductImageMetadata(productId);
 
         if (oldImageNames != null) {
@@ -105,7 +102,6 @@ public class FileService {
         return productImages; 
     }
 
-    // Mock method to save image metadata
     private void saveProductImageMetadata(String productId, List<String> fileNames) {
         
         productClient.setProductImageMetadata(productId, fileNames);
@@ -113,4 +109,117 @@ public class FileService {
 
     }
 
+    public List<String> saveFilesReview(List<MultipartFile> files) throws IOException {
+        if (files == null || files.isEmpty()) {
+            throw new IllegalArgumentException("File list cannot be empty");
+        }
+
+        List<String> fileNames = new ArrayList<>();
+        for (MultipartFile file : files) {
+            if (file.isEmpty()) {
+                throw new IllegalArgumentException("File cannot be empty: " + file.getOriginalFilename());
+            }
+            if (!file.getContentType().startsWith("image/")) {
+                throw new IllegalArgumentException("File must be an image: " + file.getOriginalFilename());
+            }
+
+            // String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            String fileName = file.getOriginalFilename();
+            System.out.println("original name: " + fileName);
+            Path filePath = Paths.get(UPLOAD_DIR_REVIEW, fileName);
+
+            Files.createDirectories(filePath.getParent());
+            Files.write(filePath, file.getBytes());
+
+            fileNames.add(fileName);
+        }
+        return fileNames;
+    }
+
+    public List<String> saveFilesAvatar(List<MultipartFile> files) throws IOException {
+        if (files == null || files.isEmpty()) {
+            throw new IllegalArgumentException("File list cannot be empty");
+        }
+
+        List<String> fileNames = new ArrayList<>();
+        for (MultipartFile file : files) {
+            if (file.isEmpty()) {
+                throw new IllegalArgumentException("File cannot be empty: " + file.getOriginalFilename());
+            }
+            if (!file.getContentType().startsWith("image/")) {
+                throw new IllegalArgumentException("File must be an image: " + file.getOriginalFilename());
+            }
+
+            // String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            String fileName = file.getOriginalFilename();
+            System.out.println("original name: " + fileName);
+            Path filePath = Paths.get(UPLOAD_DIR_AVATAR, fileName);
+
+            Files.createDirectories(filePath.getParent());
+            Files.write(filePath, file.getBytes());
+
+            fileNames.add(fileName);
+        }
+        return fileNames;
+    }
+    
+    public List<String> saveFilesOrder(List<MultipartFile> files) throws IOException {
+        if (files == null || files.isEmpty()) {
+            throw new IllegalArgumentException("File list cannot be empty");
+        }
+
+        List<String> fileNames = new ArrayList<>();
+        for (MultipartFile file : files) {
+            if (file.isEmpty()) {
+                throw new IllegalArgumentException("File cannot be empty: " + file.getOriginalFilename());
+            }
+            if (!file.getContentType().startsWith("image/")) {
+                throw new IllegalArgumentException("File must be an image: " + file.getOriginalFilename());
+            }
+
+            // String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            String fileName = file.getOriginalFilename();
+            System.out.println("original name: " + fileName);
+            Path filePath = Paths.get(UPLOAD_DIR_ORDER, fileName);
+
+            Files.createDirectories(filePath.getParent());
+            Files.write(filePath, file.getBytes());
+
+            fileNames.add(fileName);
+        }
+        return fileNames;
+    }
+
+    public void deleteFilesAvatar(List<String> fileNames) throws IOException {
+        if (fileNames == null || fileNames.isEmpty()) {
+            throw new IllegalArgumentException("File name list cannot be empty");
+        }
+    
+        for (String fileName : fileNames) {
+            Path filePath = Paths.get(UPLOAD_DIR_AVATAR, fileName);
+            if (Files.exists(filePath)) {
+                Files.delete(filePath);
+                System.out.println("Deleted file: " + filePath);
+            } else {
+                System.out.println("File not found, could not delete: " + filePath);
+            }
+        }
+    }
+
+    public void deleteFilesProduct(List<String> fileNames) throws IOException {
+        if (fileNames == null || fileNames.isEmpty()) {
+            throw new IllegalArgumentException("File name list cannot be empty");
+        }
+    
+        for (String fileName : fileNames) {
+            Path filePath = Paths.get(UPLOAD_DIR, fileName);
+            if (Files.exists(filePath)) {
+                Files.delete(filePath);
+                System.out.println("Deleted file: " + filePath);
+            } else {
+                System.out.println("File not found, could not delete: " + filePath);
+            }
+        }
+    }
+    
 }

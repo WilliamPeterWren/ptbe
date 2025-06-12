@@ -1,0 +1,42 @@
+spring:
+    application:
+        name: emailservice
+
+    mail:
+        host: smtp.gmail.com
+        port: 587
+        username: txphong2010@gmail.com
+        password: fsjw arns rghy iagk
+        protocol: smtp
+        properties:
+            mail:
+                smtp:
+                    auth: true
+                    starttls:
+                        enable: true
+                        require: true
+                    connectiontimeout: 5000
+                    timeout: 5000
+                    writetimeout: 5000
+        default-encoding: UTF-8
+
+server:
+    port: 8084
+eureka:
+    client:
+        register-with-eureka: true
+        fetch-registry: true
+        service-url:
+            defaultZone: http://localhost:8761/eureka
+    instance:
+        prefer-ip-address: true
+        hostname: localhost
+        ip-address: 127.0.0.1
+        instance-id: ${spring.application.name}:localhost:${server.port}
+
+jwt:
+    signerKey: "WjG25z4tA+dZX3clK+u0/kRg1tCdV6vvaizOfsJLgy4HFasdkfwxKso+KlGArOm4uOdkai"
+    valid-duration: 36000
+
+frontend:
+    port: 3000

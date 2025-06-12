@@ -2,10 +2,8 @@ package com.tranxuanphong.userservice.mapper;
 
 import com.tranxuanphong.userservice.dto.request.AddressUpdateRequest;
 import com.tranxuanphong.userservice.dto.request.AddressCreateRequest;
-import com.tranxuanphong.userservice.dto.request.UserUpdatePasswordRequest;
 import com.tranxuanphong.userservice.dto.response.AddressResponse;
 import com.tranxuanphong.userservice.entity.Address;
-import com.tranxuanphong.userservice.entity.User;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

@@ -1,12 +1,15 @@
 package com.tranxuanphong.peterservice.controller;
 
+import com.tranxuanphong.peterservice.dto.response.ProductResponse;
 import com.tranxuanphong.peterservice.entity.SellerVoucher;
 import com.tranxuanphong.peterservice.service.SellerVoucherService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/seller-vouchers")
@@ -47,4 +50,7 @@ public class SellerVoucherController {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+
+    
 }

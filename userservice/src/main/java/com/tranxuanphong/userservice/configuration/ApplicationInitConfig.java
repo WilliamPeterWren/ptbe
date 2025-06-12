@@ -71,7 +71,8 @@ public class ApplicationInitConfig {
        
             if(userRepository.findByEmail("phongtx.it@gmail.com").isEmpty()){                     
                 User user = User.builder() 
-                        .email("phongtx.it@gmail.com") 
+                        .email("phongtx.it@gmail.com")
+                        .username("admin")
                         .password(passwordEncoder.encode("adminphong"))     
                         .roles(roles)                
                         .build();

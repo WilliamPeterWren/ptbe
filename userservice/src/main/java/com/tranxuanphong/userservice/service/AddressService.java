@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -70,26 +71,38 @@ public class AddressService {
 
     public AddressResponse update(String addressId, AddressUpdateRequest request){
         String email = SecurityContextHolder.getContext().getAuthentication().getName(); 
+       
         User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED));  
-
+        System.out.println("user name "+user.getUsername() );
         if(!user.getAddressId().equals(addressId)){
             throw new AppException(ErrorCode.USER_ADDRESS_NOT_MATCH);
         }
-        
+        System.out.println("check.... + " + addressId );
         if(orderClient.existsByAddressId(addressId)){
+            System.out.println("exist in order...");
+
             Address address = addressMapper.toAddress(request);
             address = addressRepository.save(address);
+
+            user.setAddressId(address.getId());
+            userRepository.save(user);
 
             return addressMapper.toAddressResponse(address);
         }
 
+        System.out.println("not exit in order...");
         Address address = addressRepository.findById(addressId).orElseThrow(()-> new AppException(ErrorCode.ADDRESS_INVALID));
         addressMapper.updateAddress(address, request);
 
         return addressMapper.toAddressResponse(addressRepository.save(address));
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_SELLER','ROLE_ADMIN','ROLE_STAFF','ROLE_SHIPPER')")
+    public String address(String addressId){
+        Address address = addressRepository.findById(addressId).orElseThrow(() -> new AppException(ErrorCode.ADDRESS_INVALID));
 
+        return address.getAddress();
+    }
 
 
     

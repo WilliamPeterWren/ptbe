@@ -60,9 +60,16 @@ public class CategoryController {
   }
 
   @PutMapping("/{slug}")
-  public ApiResponse<CategoryResponse> upadte(@PathVariable String slug, @RequestBody CategoryUpdateRequest request) {
+  public ApiResponse<CategoryResponse> update(@PathVariable String slug, @RequestBody CategoryUpdateRequest request) {
     return ApiResponse.<CategoryResponse>builder()
     .result(categoryService.update(slug, request))
+    .build();
+  }
+
+  @PutMapping("/id/{id}")
+  public ApiResponse<CategoryResponse> updateById(@PathVariable String id, @RequestBody CategoryUpdateRequest request) {
+    return ApiResponse.<CategoryResponse>builder()
+    .result(categoryService.updateById(id, request))
     .build();
   }
   

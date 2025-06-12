@@ -26,6 +26,7 @@ public class Review {
     String userId;
     String productId;
     String variantId;
+    String orderId;
     String comment;
 
     @Builder.Default    

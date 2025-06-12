@@ -29,7 +29,7 @@ public class SecurityConfig {
   };
 
   private final String[] PUBLIC_ENDPOINTS_GET = {
-    // "/api/oderitems/**",
+    "/api/orders/exists-by-address/{addressId}",
 
   };
 
